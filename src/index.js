@@ -91,7 +91,8 @@ const compose = fns => (api, output = null) => {
   const called = Object.assign({}, api)
   delete called.fns
 
-  return step(fns, called, output)
+  // Filter out "Empty/null/undefined" fns in the array of `fns`
+  return step(fns.filter(f => f), called, output)
 }
 
 /**

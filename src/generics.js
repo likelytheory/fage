@@ -43,7 +43,7 @@ const create = DB => (table, {
   DB.create(table, db),
 
   mw.debug({msg: `${table}.create [complete]`})
-].filter(fn => !!fn))
+])
 
 /**
   Generic Update resource
@@ -69,7 +69,7 @@ const update = DB => (table, {
 
   DB.update(table, db)
 
-].filter(fn => !!fn))
+])
 
 /**
   Generic List/Find resource
@@ -121,7 +121,7 @@ const remove = DB => (table, {
   mw.verifyScopes,
   mw.debug({msg: 'Remove is not implemented'}),
   () => { throw new Error('Not implemented') }
-].filter(fn => !!fn))
+])
 
 /*
   The Generics export is initialised with an engine compatible `DB`
