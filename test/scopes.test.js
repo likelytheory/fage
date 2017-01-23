@@ -1,6 +1,6 @@
 
 import test from 'ava'
-import {getScopesByRole, grantRole} from '../scopes'
+import {getScopesByRole, grantRole} from '../src/scopes'
 
 const scopes = {
   user: ['user', 'user:emails'],

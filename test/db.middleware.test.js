@@ -13,11 +13,11 @@ const DBMemoryStub = {
   remove: retArgs
 }
 
-td.replace('../db/memorydb', DBMemoryStub)
+td.replace('../src/db/memorydb', DBMemoryStub)
 test.after.always(td.reset)
 
 // Testdouble stubbing needs "require" NOT import
-const dbmw = require('../db/middleware')
+const dbmw = require('../src/db/middleware')
 
 test('Middleware API exists', t => {
   const expectedKeys = [

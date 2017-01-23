@@ -1,6 +1,6 @@
 
 import test from 'ava'
-import generate from '../index'
+import generate from '../src/index'
 
 const def = {
   path: 'do.nothing',

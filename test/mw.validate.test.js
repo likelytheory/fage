@@ -3,7 +3,7 @@ import test from 'ava'
 
 const {
   validate
-} = require('../methods')
+} = require('../src/methods')
 
 test('validate()', t => {
   // Ensures that an undefined `opts` block does not error

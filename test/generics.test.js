@@ -5,7 +5,7 @@ import td from 'testdouble'
 
 // ALWAYS USE REQUIRE HERE - `testdouble` replaces on `require` NOT `import`
 // https://github.com/testdouble/testdouble.js/issues/147
-const generics = require('../generics')
+const generics = require('../src/generics')
 
 td.replace('./dep', {
   dothething: () => 'motherfucker'

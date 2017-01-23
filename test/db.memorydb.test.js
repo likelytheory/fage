@@ -1,6 +1,6 @@
 
 import test from 'ava'
-import DB from '../db/memorydb'
+import DB from '../src/db/memorydb'
 
 /*
   IMPORTANT TESTING NOTE:

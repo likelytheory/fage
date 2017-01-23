@@ -3,7 +3,7 @@ import test from 'ava'
 
 const {
   projectOnScopes
-} = require('../methods')
+} = require('../src/methods')
 
 test('projectOnScopes()', t => {
   const rawData = {
