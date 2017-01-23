@@ -1,5 +1,10 @@
 
 const Promise = require('bluebird')
+
+const error = require('./error')
+const generics = require('./generics')
+const log = require('./log')
+const mw = require('./methods')
 const Scopes = require('./scopes')
 const err = require('./error')
 
@@ -152,3 +157,9 @@ const generate = defs => defs.reduce((sdk, m) => {
 module.exports = generate
 module.exports.compose = compose
 module.exports.run = run
+
+module.exports.error = error
+module.exports.generics = generics
+module.exports.log = log
+module.exports.mw = mw
+module.exports.scopes = Scopes
