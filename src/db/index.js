@@ -1,5 +1,4 @@
 
-let DB = require('./memory')
+let DBmw = require('./middleware')
 
-module.exports = DB
-module.exports.useDB = nextDB => (DB = nextDB)
+module.exports = DBmw

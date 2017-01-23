@@ -105,8 +105,8 @@ const compose = fns => (api, output = null) => {
   @return {Mixed} The output of the `api.fns`
 */
 
-const runner = (api, data, meta) => {
-  if (!api.path || !api.fns) throw new Error('bad runner args (path or fns)')
+const run = (api, data, meta = {}) => {
+  if (!api.path || !api.fns) throw new Error('bad engine args (path or fns)')
 
   // Enforce immutability of the core `api` definition
   const kerchink = lock(Object.assign({}, api, {raw: data, meta: meta}))
@@ -133,12 +133,13 @@ const generate = defs => defs.reduce((sdk, m) => {
   if (!m.path || !m.fns) throw new Error('Must declare `path` and `fns`')
 
   Scopes.register(m.path, m.scopes)
-  sdk[m.path] = runner.bind(null, m)
+  sdk[m.path] = run.bind(null, m)
 
   // Re-attach metadata
   sdk[m.path].scopes = m.scopes
   sdk[m.path].model = m.model
   sdk[m.path].path = m.path
+  sdk[m.path].meta = m.meta || {}
 
   return sdk
 }, {})
@@ -150,4 +151,4 @@ const generate = defs => defs.reduce((sdk, m) => {
 
 module.exports = generate
 module.exports.compose = compose
-module.exports.runner = runner
+module.exports.run = run

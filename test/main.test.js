@@ -21,8 +21,8 @@ test('Engine export provides expected API', t => {
   )
 
   t.true(
-    typeof generate.runner === 'function',
-    'Exposes export.runner() as a function'
+    typeof generate.run === 'function',
+    'Exposes export.run() as a function'
   )
 })
 

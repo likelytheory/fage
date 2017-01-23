@@ -1,4 +1,5 @@
 
+const memoryDB = require('./db')
 const {compose} = require('./index')
 const err = require('./error')
 const mw = require('./methods')
@@ -7,7 +8,11 @@ const mw = require('./methods')
   Generics helpers
 */
 
-// Set a `where` query on the `db` object. MUTATES db.
+// `db` is the query object sent to the DB, and contains all the options and
+// data used to modify or read from the database. This fn enables setting a
+// `where` condition on that `db` query object BASED ON a "resourceId" field on
+// the `meta` channel of the definition block `def`
+// MUTATES db.
 function setWhereOnDbQuery (def, db) {
   if (!def.meta.resourceId) {
     throw err(500, 'GenericsError', 'No resourceId field set on meta')
@@ -26,23 +31,14 @@ const create = DB => (table, {
   formatOpts = {},
   requireAuth = true
 } = {}) => compose([
-  // Ensure the user is logged in (userId is present on `meta`)
-  requireAuth ? mw.verifyAuthed : null,
-  // Ensure scopes meet minimum requirements on `api.scopes`
-  mw.verifyScopes,
-  // Validate no bogus keys were passed as data (blacklist)
-  mw.preventBogusPayloadKeys,
-  // Merges meta information into the user provided data
-  // Very useful for applying user ids based on out of channel auth data
-  mw.mergeFromMeta(mergeFromMeta),
-  // Format 'unlock' and 'once' to permit server setting protected fields
-  mw.format.out(Object.assign({once: true, unlock: true}, formatOpts)),
-  // Ensure final payload is valid
-  mw.validate.out(),
+  // Prep data for saving
+  mw.prepareData({
+    checkAuth: requireAuth,
+    formatOpts: Object.assign({once: true, unlock: true}, formatOpts),
+    mergeFromMeta
+  }),
   // Save to datastore
-  DB.create(table, db),
-
-  mw.debug({msg: `${table}.create [complete]`})
+  DB.create(table, db)
 ])
 
 /**
@@ -87,7 +83,7 @@ const list = DB => (table, {
   def => onResourceId && setWhereOnDbQuery(def, db),
 
   DB.list(table, db),
-  mw.selectOnScopes({userKey: userKey})
+  mw.projectOnScopes
 ])
 
 /**
@@ -107,7 +103,7 @@ const read = DB => (table, {
 
   DB.read(table, db),
   mw.verifyFound,
-  mw.selectOnScopes({userKey: userKey})
+  mw.projectOnScopes
 ])
 
 /**
@@ -133,15 +129,15 @@ const remove = DB => (table, {
   @returns {Object} A set of generic CRUD fn middlewares
 */
 
-const generics = DB => {
-  if (!DB) throw new Error('Must provide generics with DB object map')
+const generics = (DBmw = memoryDB) => {
+  if (!DBmw) throw new Error('Must provide generics with DBmw object map')
 
   return {
-    create: create(DB),
-    update: update(DB),
-    list: list(DB),
-    read: read(DB),
-    remove: remove(DB)
+    create: create(DBmw),
+    update: update(DBmw),
+    list: list(DBmw),
+    read: read(DBmw),
+    remove: remove(DBmw)
   }
 }
 

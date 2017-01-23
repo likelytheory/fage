@@ -127,35 +127,36 @@ const get = path => {
   @returns {Boolean} Check passes or fails
 */
 
-const check = (scopes, claim) => {
-  console.log('required:', scopes, 'provided:', claim)
+const check = (reqscopes, claim) => {
+  // If there are no requirements, always return true
+  if (!reqscopes || !reqscopes.length) return true
 
   // Ensure `claim` is a String or an Array
   const isStr = typeof claim === 'string'
   if (!isStr && !Array.isArray(claim)) {
-    throw new Error('Invalid Type (claim)')
+    throw new Error('Invalid Claim Type. Expected String or Array.')
   }
 
-  // Required `scopes` is a SINGLE string eg. `signals:write`. Check:
+  // Required `reqscopes` is a SINGLE string eg. `signals:write`. Check:
   // STRING : STRING
   // STRING : ARRAY
-  if (typeof scopes === 'string') {
+  if (typeof reqscopes === 'string') {
     return isStr
-      ? scopes === claim
-      : claim.indexOf(scopes) > -1
+      ? reqscopes === claim
+      : claim.indexOf(reqscopes) > -1
   }
 
-  // Required `scopes` are an ARRAY of scopes: ALL requirements must be met
+  // Required `reqscopes` are an ARRAY of scopes: ALL requirements must be met
   // ARRAY : STRING (autofail)
   // ARRAY : ARRAY
-  if (Array.isArray(scopes)) {
+  if (Array.isArray(reqscopes)) {
     return isStr
       ? false
-      : scopes.reduce((ac, v) => (ac && claim.indexOf(v) > -1), true)
+      : reqscopes.reduce((ac, v) => (ac && claim.indexOf(v) > -1), true)
   }
 
-  // `scopes` is not a String OR an Array. Fail this hard.
-  throw new Error('Invalid Type (scopes)', scopes)
+  // `reqscopes` is not a String OR an Array. Fail this hard.
+  throw new Error('Invalid Type (reqscopes)', reqscopes)
 }
 
 module.exports = {
