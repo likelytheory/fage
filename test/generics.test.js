@@ -3,15 +3,20 @@
 import test from 'ava'
 import td from 'testdouble'
 
+import db from '../src/db'
+
+db.MemoryDB.setStore({punks: {}})
+
 // ALWAYS USE REQUIRE HERE - `testdouble` replaces on `require` NOT `import`
 // https://github.com/testdouble/testdouble.js/issues/147
-const generics = require('../src/generics')
+const generics = require('../src/generics')(db)
 
-td.replace('./dep', {
-  dothething: () => 'motherfucker'
-})
+test.todo('Create Generics tests')
 
-test('Do stubs work', t => {
-  console.log('---', generics)
-  // console.log(td.verify(derp.dothething('woo')))
+test.skip('Generics', async t => {
+  // 1. Create a new entry
+  // 2. Read it
+  // 3. Update it
+  // 4. List it
+  // 5. Remove it
 })

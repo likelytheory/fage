@@ -1,5 +1,5 @@
 
-const memoryDB = require('./db')
+const memoryDBwrapper = require('./db')
 const {compose} = require('./core')
 const err = require('./error')
 const mw = require('./methods')
@@ -8,17 +8,17 @@ const mw = require('./methods')
   Generics helpers
 */
 
-// `db` is the query object sent to the DB, and contains all the options and
+// `qry` is the query object sent to the DB, and contains all the options and
 // data used to modify or read from the database. This fn enables setting a
-// `where` condition on that `db` query object BASED ON a "resourceId" field on
-// the `meta` channel of the definition block `def`
-// MUTATES db.
-function setWhereOnDbQuery (def, db) {
-  if (!def.meta.resourceId) {
+// `where` condition on that `qry` query object BASED ON a "resourceId" field
+// on the `meta` channel of the definition block `ctx`
+// MUTATES qry!
+function setWhereOnDbQuery (ctx, qry) {
+  if (!ctx.meta.resourceId) {
     throw err(500, 'GenericsError', 'No resourceId field set on meta')
   }
-  const cond = {id: def.meta.resourceId}
-  db.where = Object.assign({}, db.where, cond)
+  const cond = {id: ctx.meta.resourceId}
+  qry.where = Object.assign({}, qry.where, cond)
 }
 
 /**
@@ -38,7 +38,7 @@ const create = DB => (table, {
     mergeFromMeta
   }),
   // Save to datastore
-  DB.create(table, db)
+  (ctx, toSave) => DB.create(table, db, toSave)
 ])
 
 /**
@@ -46,7 +46,7 @@ const create = DB => (table, {
 */
 
 const update = DB => (table, {
-  db = {},
+  qry = {},
   onResourceId = false,
   requireAuth = true
 } = {}) => compose([
@@ -56,14 +56,14 @@ const update = DB => (table, {
 
   mw.preventBogusPayloadKeys,
 
-  // Set a `where` query on the `db` object if resource Id passed. MUTATES db.
-  def => (onResourceId) && setWhereOnDbQuery(def, db),
+  // Set a `where` query on the `qry` object if resource Id passed. MUTATES qry.
+  ctx => (onResourceId) && setWhereOnDbQuery(ctx, qry),
 
   // Prepare the payload
   mw.format.raw({defaults: false}),
   mw.validate.out(),
 
-  DB.update(table, db)
+  (ctx, toSave) => DB.update(table, qry, toSave)
 
 ])
 
@@ -72,17 +72,17 @@ const update = DB => (table, {
 */
 
 const list = DB => (table, {
-  db = {},
+  qry = {},
   userKey = 'id',
   onResourceId = false
 } = {}) => compose([
   // First ensure user has appropriate global scope if any on the definition
   mw.verifyScopes,
 
-  // Set a `where` query on the `db` object if resource Id passed. MUTATES db.
-  def => onResourceId && setWhereOnDbQuery(def, db),
+  // Set a `where` query on the `qry` object if resource Id passed. MUTATES qry.
+  ctx => onResourceId && setWhereOnDbQuery(ctx, qry),
 
-  DB.list(table, db),
+  ctx => DB.list(table, qry),
   mw.projectOnScopes
 ])
 
@@ -91,17 +91,17 @@ const list = DB => (table, {
 */
 
 const read = DB => (table, {
-  db = {},
+  qry = {},
   userKey = 'id',
   onResourceId = false
 } = {}) => compose([
   // First ensure user has appropriate global scope if any on the definition
   mw.verifyScopes,
 
-  // Set a `where` query on the `db` object if resource Id passed. MUTATES db.
-  def => onResourceId && setWhereOnDbQuery(def, db),
+  // Set a `where` query on the `qry` object if resource Id passed. MUTATES qry.
+  ctx => onResourceId && setWhereOnDbQuery(ctx, qry),
 
-  DB.read(table, db),
+  ctx => DB.read(table, qry),
   mw.verifyFound,
   mw.projectOnScopes
 ])
@@ -121,23 +121,23 @@ const remove = DB => (table, {
 
 /*
   The Generics export is initialised with an engine compatible `DB`
-  The DB is a set of named functions (create, update, list, etc.) that return
-  engine middleware `mw(api, output)` for use in definition blocks
+  The DB is a set of named functions (create, update, list, etc.) that wrap
+  an underlying database driver.
 
-  @param {Object} DB An engine compatible set of named middleware fns
+  @param {Object} db An engine compatible set of named db commands
 
   @returns {Object} A set of generic CRUD fn middlewares
 */
 
-const generics = (DBmw = memoryDB) => {
-  if (!DBmw) throw new Error('Must provide generics with DBmw object map')
+const generics = (db = memoryDBwrapper) => {
+  if (!db) throw new Error('Must provide generics with DB object map')
 
   return {
-    create: create(DBmw),
-    update: update(DBmw),
-    list: list(DBmw),
-    read: read(DBmw),
-    remove: remove(DBmw)
+    create: create(db),
+    update: update(db),
+    list: list(db),
+    read: read(db),
+    remove: remove(db)
   }
 }
 

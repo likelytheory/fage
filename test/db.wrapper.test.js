@@ -17,15 +17,16 @@ td.replace('../src/db/memorydb', DBMemoryStub)
 test.after.always(td.reset)
 
 // Testdouble stubbing needs "require" NOT import
-const dbmw = require('../src/db/middleware')
+const dbmw = require('../src/db/wrapper')
 
-test('Middleware API exists', t => {
+test('Wrapper API exists', t => {
   const expectedKeys = [
     'create',
     'update',
     'save',
     'read',
-    'list'
+    'list',
+    'remove'
   ]
 
   t.plan(expectedKeys.length)
@@ -38,8 +39,7 @@ test('Middleware API exists', t => {
 // Placeholder parameters to do pass to middleware and check against
 const table = 'tableName'
 const options = {opts: true}
-const def = {defBlock: 1}
-const out = {myData: 'woo!'}
+const data = {myData: 'woo!'}
 
 // The `prep()` method is used to prepare application `where` calls for the
 // DB layer in MemoryDB.
@@ -63,37 +63,37 @@ test('._prep(where)', t => {
 // (in this case, the Memory DB)
 // - - - -
 
-test('.create() passes (table, out, opts)', async t => {
-  const ret = await dbmw.create(table, options)(def, out)
+test('.create() passes (table, data, opts)', async t => {
+  const ret = await dbmw.create(table, options, data)
   t.is(ret[0], table)
-  t.is(ret[1], out)
+  t.is(ret[1], data)
   t.is(ret[2], options)
 })
 
-test('.update() passes (table, out, opts)', async t => {
-  const ret = await dbmw.update(table, options)(def, out)
+test('.update() passes (table, data, opts)', async t => {
+  const ret = await dbmw.update(table, options, data)
   t.is(ret[0], table)
-  t.is(ret[1], out)
+  t.is(ret[1], data)
   t.is(ret[2], options)
 })
 
-test('.save() passes (table, out, opts)', async t => {
-  const ret = await dbmw.save(table, options)(def, out)
+test('.save() passes (table, data, opts)', async t => {
+  const ret = await dbmw.save(table, options, data)
   t.is(ret[0], table)
-  t.is(ret[1], out)
+  t.is(ret[1], data)
   t.is(ret[2], options)
 })
 
 test('.read() passes (table, combinedOpts)', async t => {
-  const ret = await dbmw.read(table, options)(def, out)
+  const ret = await dbmw.read(table, options, data)
   t.is(ret[0], table)
   t.is(ret[1].opts, options.opts)
-  t.is(ret[1].myData, out.myData)
+  t.is(ret[1].myData, data.myData)
 })
 
 test('.list() passes (table, combinedOpts)', async t => {
-  const ret = await dbmw.list(table, options)(def, out)
+  const ret = await dbmw.list(table, options, data)
   t.is(ret[0], table)
   t.is(ret[1].opts, options.opts)
-  t.is(ret[1].myData, out.myData)
+  t.is(ret[1].myData, data.myData)
 })
