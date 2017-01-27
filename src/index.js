@@ -3,6 +3,7 @@ const error = require('./error')
 const generics = require('./generics')
 const log = require('./log')
 const mw = require('./methods')
+const DB = require('./db')
 const Scopes = require('./scopes')
 const {run, compose} = require('./core')
 
@@ -43,6 +44,7 @@ module.exports = generate
 module.exports.compose = compose
 module.exports.run = run
 
+module.exports.db = DB
 module.exports.error = error
 module.exports.generics = generics
 module.exports.log = log
