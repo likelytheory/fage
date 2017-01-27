@@ -12,53 +12,53 @@ const {compose} = require('./core')
   @throws {Error} No userId present (probably not logged in)
 */
 
-const verifyAuthed = api => {
-  if (api.meta.userId) return true
+const verifyAuthed = ctx => {
+  if (ctx.meta.userId) return true
 
   // Not logged in?? UNLEASH THE FUCKING DRAGONS!@!?!!@!@$!@#@!
   throw err(401, 'NotLoggedIn', 'Must provide a valid userId on meta channel')
 }
 
 /**
-  Ensures caller scopes on `.meta.scopes` meet `api` block required scopes
+  Ensures caller scopes on `.meta.scopes` meet `ctx` block required scopes
   @private
 */
 
-const _checkScopes = def => {
-  Log.trace('Scope requirements:', def.scopes)
-  if (!def.scopes || !def.scopes.length) return true
+const _checkScopes = ctx => {
+  Log.trace('Scope requirements:', ctx.scopes)
+  if (!ctx.scopes || !ctx.scopes.length) return true
 
   // No need to check if scopes are required but none are provided
-  if (!def.meta.scopes) return false
+  if (!ctx.meta.scopes) return false
 
   // Build up flat array of scope grants
   let grants = []
-  if (Array.isArray(def.meta.scopes)) grants = def.meta.scopes
-  else if (Object.keys(def.meta.scopes).length) {
+  if (Array.isArray(ctx.meta.scopes)) grants = ctx.meta.scopes
+  else if (Object.keys(ctx.meta.scopes).length) {
     // Step over each resource grant and add it to the `grants` list
-    Object.keys(def.meta.scopes)
-      .forEach(resource => grants.concat(def.meta.scopes[resource]))
+    Object.keys(ctx.meta.scopes)
+      .forEach(resource => grants.concat(ctx.meta.scopes[resource]))
   }
 
   // No grants provided? Obviously fail.
   if (!grants.length) return false
 
-  return Scopes.check(def.scopes, grants)
+  return Scopes.check(ctx.scopes, grants)
 }
 
 /**
-  Ensures caller scopes on `.meta.scopes` meet `api` block required scopes
+  Ensures caller scopes on `.meta.scopes` meet `ctx` block required scopes
   or THROWS a 403 Forbidden error
 
-  @param {Object} api Required `.scopes` and user determined `.meta.scopes`
+  @param {Object} ctx Required `.scopes` and user determined `.meta.scopes`
 
   @throws {Error} Scopes are invalid
   @return {true} Scopes are valid
 */
 
-const verifyScopes = api => {
+const verifyScopes = ctx => {
   // Trying to access things you shouldn't? A sphincter says what?
-  if (!_checkScopes(api)) {
+  if (!_checkScopes(ctx)) {
     const msg = 'Insufficient permissions to access this resource'
     throw err(403, 'Forbidden', msg)
   }
@@ -67,7 +67,7 @@ const verifyScopes = api => {
 }
 
 /**
-  Ensures caller scopes on `.meta.scopes` meet `api` block required scopes
+  Ensures caller scopes on `.meta.scopes` meet `ctx` block required scopes
   @return {Boolean} Scopes are valid or not
 */
 
@@ -77,8 +77,8 @@ const hasValidScopes = _checkScopes
   Verifies that the userId field matches the requested resource on `field`
 */
 
-const verifyOwnershipOnField = field => (def, resource) => {
-  if (resource[field] !== def.meta.userId) {
+const verifyOwnershipOnField = field => (ctx, resource) => {
+  if (resource[field] !== ctx.meta.userId) {
     throw err(403, 'Forbidden', 'Sorry, no permissions to do that on this res')
   }
   return resource
@@ -88,7 +88,7 @@ const verifyOwnershipOnField = field => (def, resource) => {
   Ensures a result is present, either contents in an array OR an `id` on data
 */
 
-const verifyFound = (def, result) => {
+const verifyFound = (ctx, result) => {
   let exists = true
   if (!result) exists = false
   if (Array.isArray(result) && !result.length) exists = false
@@ -99,14 +99,14 @@ const verifyFound = (def, result) => {
 }
 
 /**
-  Ensures a `resourceId` field is set on `def`
+  Ensures a `resourceId` field is set on `ctx`
 
   @returns Input data channel passthrough
   @throws {Error}
 */
 
-const verifyResourceIdSet = (def, out) => {
-  if (!def.meta.resourceId) {
+const verifyResourceIdSet = (ctx, out) => {
+  if (!ctx.meta.resourceId) {
     throw err('400', 'NoResourceId', 'Expected to find a `resourceId`')
   }
   return out
@@ -114,7 +114,7 @@ const verifyResourceIdSet = (def, out) => {
 
 /**
   Formats a record's visible fields (ie. those that are returned) based on the
-  `def.model` provided on `def`, using the `def.state.activeScopes` for
+  `ctx.model` provided on `ctx`, using the `ctx.state.activeScopes` for
   handling formatting. Requires that some method up the chain sets the
   'activeScopes' to use.
 
@@ -124,14 +124,14 @@ const verifyResourceIdSet = (def, out) => {
   @returns {Function} Middleware that operates on Object data or Array of objs
 */
 
-const projectOnScopes = (def, data) => {
-  if (!def.model) {
+const projectOnScopes = (ctx, data) => {
+  if (!ctx.model) {
     Log.debug('[mw.projectOnScopes] No model provided, ignoring projection')
     return data
   }
 
   function project (record) {
-    const state = def.state || {}
+    const state = ctx.state || {}
     const useTheseScopes = state.activeScopes || []
 
     // Explicitly set the format options to ONLY 'show'
@@ -143,7 +143,7 @@ const projectOnScopes = (def, data) => {
       unlock: true // Leaves locked fields on the data
     }
 
-    return format(def.model, record, options)
+    return format(ctx.model, record, options)
   }
 
   return Array.isArray(data)
@@ -156,16 +156,16 @@ const projectOnScopes = (def, data) => {
   Checks user provided data has no unknown keys - useful as a quick check
   validation prior to mutating raw user input.
 
-  @param {Object} api API block definition with `.model` to validate against
+  @param {Object} ctx API block definition with `.model` to validate against
 
   @throws {Error} Invalid keys detected
   @return {true} User data keys are valid
 */
 
-const preventBogusPayloadKeys = api => {
-  if (!api.model) return Log.warn('No `model` set on ' + api.path)
+const preventBogusPayloadKeys = ctx => {
+  if (!ctx.model) return Log.warn('No `model` set on ' + ctx.path)
 
-  const keyCheck = validate(api.model, api.raw, {keyCheckOnly: true})
+  const keyCheck = validate(ctx.model, ctx.raw, {keyCheckOnly: true})
   if (keyCheck.valid) return true
 
   // Error if the validation fails
@@ -182,7 +182,7 @@ const preventBogusPayloadKeys = api => {
   @return {Function} Middleware that logs message and continues data output
 */
 
-const debug = (opts = {msg: ''}) => (api, out) => {
+const debug = (opts = {msg: ''}) => (ctx, out) => {
   Log.trace(opts.msg, out)
   return out
 }
@@ -215,15 +215,15 @@ const fmt = {
     @return {Function} Middleware that formats continued data, sync continue
   */
 
-  out: opts => (api, out) => format(opts.model || api.model, out, opts),
+  out: opts => (ctx, out) => format(opts.model || ctx.model, out, opts),
 
   /**
     Thin wrapper for `Skematic.format`
     @param {Object} [opts] Optional options for `Skematic.format`
-    @return {Function} Middleware that formats `api.raw` data, sync continue
+    @return {Function} Middleware that formats `ctx.raw` data, sync continue
   */
 
-  raw: opts => api => format(opts.model || api.model, api.raw, opts)
+  raw: opts => ctx => format(opts.model || ctx.model, ctx.raw, opts)
 }
 
 /**
@@ -263,15 +263,15 @@ const vld = {
     @return {Function} Middleware to validate and continue data output
   */
 
-  out: (opts = {}) => (api, out) => _vld(opts.model || api.model, out, opts),
+  out: (opts = {}) => (ctx, out) => _vld(opts.model || ctx.model, out, opts),
 
   /**
     Inherit docs from `_vld` (thin wrapper)
     @throws {Error} Validation failed
-    @return {Function} Middleware to validate `api.raw` and continue output
+    @return {Function} Middleware to validate `ctx.raw` and continue output
   */
 
-  raw: (opts = {}) => api => _vld(opts.model || api.model, api.raw, opts)
+  raw: (opts = {}) => ctx => _vld(opts.model || ctx.model, ctx.raw, opts)
 }
 
 /**
@@ -296,7 +296,7 @@ const prepareData = ({
   // Ensure the user is logged in (userId is present on `meta`)
   checkAuth ? verifyAuthed : null,
 
-  // Ensure scopes meet minimum requirements on `api.scopes`
+  // Ensure scopes meet minimum requirements on `ctx.scopes`
   checkScopes ? verifyScopes : null,
 
   // Validate no bogus keys were passed as data (blacklist)
