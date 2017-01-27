@@ -3,7 +3,7 @@ const {format, validate} = require('skematic')
 const Scopes = require('./scopes')
 const Log = require('./log')
 const err = require('./error')
-const {compose} = require('./index')
+const {compose} = require('./core')
 
 /**
   Ensures a `userId` exists on the `meta` channel

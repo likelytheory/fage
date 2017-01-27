@@ -1,6 +1,6 @@
 
 const memoryDB = require('./db')
-const {compose} = require('./index')
+const {compose} = require('./core')
 const err = require('./error')
 const mw = require('./methods')
 
