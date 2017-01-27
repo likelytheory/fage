@@ -3,7 +3,7 @@ const DB = require('./memorydb')
 
 // Formats the `where` condition to support multi-key where objects
 // {hi: 1, yo: 2} -> {and: [{hi: {eq: 1}}, {yo: {eq: 2}}]}
-const prep = opts => {
+const prep = (opts = {}) => {
   if (!opts.where) return opts
 
   const w = opts.where
