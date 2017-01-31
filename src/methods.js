@@ -192,7 +192,7 @@ const preventBogusPayloadKeys = ctx => {
   if (keyCheck.valid) return true
 
   // Error if the validation fails
-  throw error.badequest({
+  throw error.badrequest({
     type: 'InvalidPayload',
     msg: 'Invalid keys in payload: ' + Object.keys(keyCheck.errors).join(', ')
   })
