@@ -1,9 +1,9 @@
 
-const {format, validate} = require('skematic')
 const Scopes = require('./scopes')
-const Log = require('./log')
 const err = require('./error')
+const events = require('./events')
 const {compose} = require('./core')
+const {format, validate} = require('skematic')
 
 /**
   Ensures a `userId` exists on the `meta` channel
@@ -25,7 +25,12 @@ const verifyAuthed = ctx => {
 */
 
 const _checkScopes = ctx => {
-  Log.trace('Scope requirements:', ctx.scopes)
+  events.emit('log/TRACE', {
+    channel: 'mw',
+    msg: 'mw._checkScopes',
+    data: {required: ctx.scopes, claimed: ctx.meta.scopes, path: ctx.path}
+  })
+
   if (!ctx.scopes || !ctx.scopes.length) return true
 
   // No need to check if scopes are required but none are provided
@@ -126,7 +131,11 @@ const verifyResourceIdSet = (ctx, out) => {
 
 const projectOnScopes = (ctx, data) => {
   if (!ctx.model) {
-    Log.debug('[mw.projectOnScopes] No model provided, ignoring projection')
+    events.emit('log/DEBUG', {
+      channel: 'mw',
+      msg: 'mw.projectOnScopes - No model provided, ignoring projection',
+      data: {path: ctx.path}
+    })
     return data
   }
 
@@ -163,7 +172,13 @@ const projectOnScopes = (ctx, data) => {
 */
 
 const preventBogusPayloadKeys = ctx => {
-  if (!ctx.model) return Log.warn('No `model` set on ' + ctx.path)
+  if (!ctx.model) {
+    return events.emit('log/DEBUG', {
+      channel: 'mw',
+      msg: 'No `model` set on ' + ctx.path,
+      data: {path: ctx.path}
+    })
+  }
 
   const keyCheck = validate(ctx.model, ctx.raw, {keyCheckOnly: true})
   if (keyCheck.valid) return true
@@ -183,7 +198,11 @@ const preventBogusPayloadKeys = ctx => {
 */
 
 const debug = (opts = {msg: ''}) => (ctx, out) => {
-  Log.trace(opts.msg, out)
+  events.emit('log/DEBUG', {
+    channel: 'mw',
+    msg: opts.msg,
+    data: {path: ctx.path, payload: out}
+  })
   return out
 }
 
@@ -239,16 +258,25 @@ const fmt = {
   @private
 */
 
-function _vld (model, data = {}, opts = {}) {
+function _vld (model, data = {}, opts = {}, ctx) {
   if (!model) {
     // This is an INTERNAL failure - it means the definition block is missing
     // a Skematic model but still calling validate in its `fns`
-    Log.warn('No .model was provided on the API definition')
+    events.emit('log/WARN', {
+      channel: 'mw',
+      msg: 'No model defined on the context definition',
+      data: {path: ctx.path}
+    })
     throw err(500, 'Validation', 'Internal definitions missing Model data')
   }
 
   const vx = validate(model, data, opts)
-  Log.trace('validator:', vx)
+
+  events.emit('log/TRACE', {
+    channel: 'mw',
+    msg: 'Validation output',
+    data: {path: ctx.path, validator: vx}
+  })
 
   if (vx.valid) return data
 
@@ -263,7 +291,9 @@ const vld = {
     @return {Function} Middleware to validate and continue data output
   */
 
-  out: (opts = {}) => (ctx, out) => _vld(opts.model || ctx.model, out, opts),
+  out: (opts = {}) => (ctx, out) => _vld(
+    opts.model || ctx.model, out, opts, ctx
+  ),
 
   /**
     Inherit docs from `_vld` (thin wrapper)
@@ -271,7 +301,7 @@ const vld = {
     @return {Function} Middleware to validate `ctx.raw` and continue output
   */
 
-  raw: (opts = {}) => ctx => _vld(opts.model || ctx.model, ctx.raw, opts)
+  raw: (opts = {}) => ctx => _vld(opts.model || ctx.model, ctx.raw, opts, ctx)
 }
 
 /**
