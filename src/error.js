@@ -11,33 +11,40 @@
   @returns {Error} with {status, type, debug} fields
 */
 
-function buildError (status, type, msg, debug, errors) {
+function buildError ({status, type, msg, code, debug, errors}) {
+  if (!status) {
+    throw new Error('MUST provide error builder `status` and `type` props')
+  }
+
   let error = new Error(msg || type)
   error.type = type
   error.status = status
-  error.debug = debug || null
 
+  if (code) error.code = code
+  if (debug) error.debug = debug
   if (errors) error.errors = errors // "Doctor", "Doctor", "Doctor" :D So derp.
 
   return error
 }
 
-// Function overloader
-// Enables calling err(engineErrObj) AND err(status, type, message, debug, errors)
-function err (arg) {
-  return typeof arg === 'object'
-    ? buildError(arg.status, arg.type, arg.message, arg.debug, arg.errors)
-    : buildError.apply(null, arguments)
+function preBuild (status, type) {
+  let eo = {status, type}
+  return function errorPartial (opts = {}) {
+    let pass = Object.assign({}, opts, eo)
+    // Allow user specified type to override default
+    if (opts.type) pass.type = opts.type
+
+    return buildError(pass)
+  }
 }
 
 /*
-  Common Errors
+  Available error generators
 */
 
-err.badrequest = err.bind(null, 400, 'BadRequest')
-err.unauthorized = err.bind(null, 401, 'Unauthorized')
-err.forbidden = err.bind(null, 403, 'Forbidden')
-err.notfound = err.bind(null, 404, 'NotFound')
-err.fatal = err.bind(null, 500, 'ServerError')
-
-module.exports = err
+module.exports.create = buildError
+module.exports.badrequest = preBuild(400, 'BadRequest')
+module.exports.unauthorized = preBuild(401, 'Unauthorized')
+module.exports.forbidden = preBuild(403, 'Forbidden')
+module.exports.notfound = preBuild(404, 'NotFound')
+module.exports.fatal = preBuild(500, 'ServerError')

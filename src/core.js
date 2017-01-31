@@ -39,13 +39,18 @@ const step = (fns, api, initial = null) => {
     // Sanity check that `out` isn't an uninvoked function
     // (Can happen when nesting middleware functions incorrectly)
     if (typeof out === 'function') {
-      const errMsg = 'Invalid: Middlware chain returned a function'
+      const errMsg = 'Fage middlware chain returned a function'
       const debug = {
         path: api.path,
         details: 'Middleware in `fns` chain must return a value not a ' +
           'function. Probably a nested middleware missing an invocation.'
       }
-      throw error(500, 'MiddlewareError', errMsg, debug)
+      throw error.create({
+        status: 500,
+        type: 'MiddlewareError',
+        msg: errMsg,
+        debug
+      })
     }
 
     return fn(api, out)

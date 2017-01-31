@@ -1,6 +1,6 @@
 
 const Scopes = require('./scopes')
-const err = require('./error')
+const error = require('./error')
 const events = require('./events')
 const {compose} = require('./core')
 const {format, validate} = require('skematic')
@@ -16,7 +16,9 @@ const verifyAuthed = ctx => {
   if (ctx.meta.userId) return true
 
   // Not logged in?? UNLEASH THE FUCKING DRAGONS!@!?!!@!@$!@#@!
-  throw err(401, 'NotLoggedIn', 'Must provide a valid userId on meta channel')
+  throw error.unauthorized({
+    msg: 'Must provide a valid userId on meta channel'
+  })
 }
 
 /**
@@ -65,7 +67,7 @@ const verifyScopes = ctx => {
   // Trying to access things you shouldn't? A sphincter says what?
   if (!_checkScopes(ctx)) {
     const msg = 'Insufficient permissions to access this resource'
-    throw err(403, 'Forbidden', msg)
+    throw error.forbidden({msg})
   }
 
   return true
@@ -84,7 +86,9 @@ const hasValidScopes = _checkScopes
 
 const verifyOwnershipOnField = field => (ctx, resource) => {
   if (resource[field] !== ctx.meta.userId) {
-    throw err(403, 'Forbidden', 'Sorry, no permissions to do that on this res')
+    throw error.forbidden({
+      msg: 'Sorry, no permissions to do that on this res'
+    })
   }
   return resource
 }
@@ -99,7 +103,7 @@ const verifyFound = (ctx, result) => {
   if (Array.isArray(result) && !result.length) exists = false
   if (typeof result === 'object' && !result.id) exists = false
 
-  if (!exists) throw err(404, 'NoResults')
+  if (!exists) throw error.notfound()
   else return result
 }
 
@@ -112,7 +116,11 @@ const verifyFound = (ctx, result) => {
 
 const verifyResourceIdSet = (ctx, out) => {
   if (!ctx.meta.resourceId) {
-    throw err('400', 'NoResourceId', 'Expected to find a `resourceId`')
+    throw error.badrequest({
+      type: 'NoResourceId',
+      msg: 'Expected to find a `resourceId`',
+      debug: {path: ctx.path}
+    })
   }
   return out
 }
@@ -184,9 +192,10 @@ const preventBogusPayloadKeys = ctx => {
   if (keyCheck.valid) return true
 
   // Error if the validation fails
-  throw err(400, 'Validation', 'Invalid keys in payload: ' +
-    Object.keys(keyCheck.errors).join(', ')
-  )
+  throw error.badequest({
+    type: 'InvalidPayload',
+    msg: 'Invalid keys in payload: ' + Object.keys(keyCheck.errors).join(', ')
+  })
 }
 
 /**
@@ -267,7 +276,10 @@ function _vld (model, data = {}, opts = {}, ctx) {
       msg: 'No model defined on the context definition',
       data: {path: ctx.path}
     })
-    throw err(500, 'Validation', 'Internal definitions missing Model data')
+    throw error.fatal({
+      type: 'Validation',
+      msg: 'Internal definitions missing Model data'
+    })
   }
 
   const vx = validate(model, data, opts)
@@ -281,7 +293,11 @@ function _vld (model, data = {}, opts = {}, ctx) {
   if (vx.valid) return data
 
   // Fail on validation error - err(status, type, msg, debug, errors)
-  throw err(400, 'Validation', 'Data validation failed', null, vx.errors)
+  throw error.badrequest({
+    type: 'Validation',
+    msg: 'Data validation failed',
+    errors: vx.errors
+  })
 }
 
 const vld = {

@@ -1,7 +1,7 @@
 
 const memoryDBwrapper = require('./db')
 const {compose} = require('./core')
-const err = require('./error')
+const error = require('./error')
 const mw = require('./methods')
 
 /*
@@ -15,7 +15,11 @@ const mw = require('./methods')
 // MUTATES qry!
 function setWhereOnDbQuery (ctx, qry) {
   if (!ctx.meta.resourceId) {
-    throw err(500, 'GenericsError', 'No resourceId field set on meta')
+    throw error.create({
+      status: 500,
+      type: 'GenericsError',
+      msg: 'No resourceId field set on meta'
+    })
   }
   const cond = {id: ctx.meta.resourceId}
   qry.where = Object.assign({}, qry.where, cond)
