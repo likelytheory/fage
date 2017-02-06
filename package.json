@@ -15,5 +15,12 @@
   "devDependencies": {
     "ava": "^0.17.0",
     "testdouble": "^1.11.0"
+  },
+  "peerDependencies": {
+    "basic-auth": "^1.1.0",
+    "kcors": "^2.2.0",
+    "koa": "^2.0.0-alpha.7",
+    "koa-bodyparser": "^3.2.0",
+    "koa-mount": "^2.0.0"
   }
 }
