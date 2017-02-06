@@ -10,6 +10,7 @@ test('Errors export defined API', t => {
     'unauthorized',
     'forbidden',
     'notfound',
+    'conflict',
     'fatal'
   ].sort()
 
@@ -23,6 +24,7 @@ test('HTTP statuses match expectation', t => {
   t.is(errors.unauthorized().status, 401)
   t.is(errors.forbidden().status, 403)
   t.is(errors.notfound().status, 404)
+  t.is(errors.conflict().status, 409)
   t.is(errors.fatal().status, 500)
 })
 
@@ -31,6 +33,7 @@ test('HTTP types match expectation', t => {
   t.is(errors.unauthorized().type, 'Unauthorized')
   t.is(errors.forbidden().type, 'Forbidden')
   t.is(errors.notfound().type, 'NotFound')
+  t.is(errors.conflict().type, 'Conflict')
   t.is(errors.fatal().type, 'ServerError')
 })
 
