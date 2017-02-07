@@ -4,7 +4,7 @@
 */
 
 const notFoundHandler = ctx => {
-  ctx.throw(404, 'NotFound: ' + ctx.path)
+  ctx.throw(404, `NotFound: ${ctx.method} ${ctx.path}`)
 }
 
 module.exports = notFoundHandler
