@@ -49,7 +49,8 @@ function buildAPI (sdk, {
   if (!path) throw new Error('[api.rest] Must specify `path` to mount API')
 
   events.emit('log/INFO', {
-    msg: '[api.rest] New App Mounting on: ' + path
+    channel: 'rest',
+    msg: 'New App Mounting on: ' + path
   })
 
   // Setup new Koa app
