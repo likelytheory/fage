@@ -11,7 +11,8 @@ test('Errors export defined API', t => {
     'forbidden',
     'notfound',
     'conflict',
-    'fatal'
+    'fatal',
+    'unavailable'
   ].sort()
 
   const exportedKeys = Object.keys(errors).sort()
@@ -35,6 +36,7 @@ test('HTTP types match expectation', t => {
   t.is(errors.notfound().type, 'NotFound')
   t.is(errors.conflict().type, 'Conflict')
   t.is(errors.fatal().type, 'ServerError')
+  t.is(errors.unavailable().type, 'Unavailable')
 })
 
 test('Prebuilt errors can override type but not status', t => {
