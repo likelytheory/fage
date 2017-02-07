@@ -81,7 +81,7 @@ function makeRoute (key, fn) {
 
   // No method was derived, do not attempt to setup a route
   if (!method) {
-    events.emit('log/trace', {
+    events.emit('log/TRACE', {
       channel: 'rest',
       msg: `Skip unknown route ${path}`
     })
@@ -89,7 +89,7 @@ function makeRoute (key, fn) {
   }
 
   // Log the setup of the path
-  events.emit('log/DEBUG', {
+  events.emit('log/TRACE', {
     channel: 'rest',
     msg: `Add route ${method}, ${path}`
   })
