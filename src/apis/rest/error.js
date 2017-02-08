@@ -19,10 +19,13 @@ const errorHandler = (ctx, next) => {
         ? err.message
         : `Internal Server Error: ${err.message}`
 
+      const domain = ctx.domain
+      const data = {error: err}
+
       // Log the error at the appropriate log-level
       status >= 500
-        ? events.emit('log/ERROR', {channel: 'rest', data: {error: err}, msg})
-        : events.emit('log/INFO', {channel: 'rest', msg})
+        ? events.emit('log/ERROR', {domain, channel: 'rest', data, msg})
+        : events.emit('log/INFO', {domain, channel: 'rest', msg})
 
       let response = {
         status,
@@ -50,6 +53,7 @@ const errorHandler = (ctx, next) => {
     // Safety catch if some crazy state causes a throw above
     .catch(fatal => {
       events.emit('log/ERROR', {
+        domain: ctx.domain,
         channel: 'rest',
         msg: 'Exception in Error handler',
         data: {error: fatal}

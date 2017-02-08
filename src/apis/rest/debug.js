@@ -1,15 +1,7 @@
 
-const events = require('../../events')
-
 // Enable API error debug responses if passed header: 'X-API-Debug': key
 const API_HDR = 'X-API-Debug'
 const API_DEBUG = process.env.REST_API_DEBUG || 'api.debug-f4g3!r3sT'
-
-// Log the access code and the header used this instance
-events.emit('log/DEBUG', {
-  channel: 'rest',
-  msg: 'Debug header: ' + API_HDR + ' ' + API_DEBUG
-})
 
 module.exports = (ctx, next) => {
   let useDebug = false
@@ -25,3 +17,6 @@ module.exports = (ctx, next) => {
 
   return next()
 }
+
+module.exports.API_HDR = API_HDR
+module.exports.API_DEBUG = API_DEBUG

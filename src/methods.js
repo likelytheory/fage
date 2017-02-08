@@ -28,6 +28,7 @@ const verifyAuthed = ctx => {
 
 const _checkScopes = ctx => {
   events.emit('log/TRACE', {
+    domain: ctx.domain,
     channel: 'mw',
     msg: 'mw._checkScopes',
     data: {required: ctx.scopes, claimed: ctx.meta.scopes, path: ctx.path}
@@ -140,6 +141,7 @@ const verifyResourceIdSet = (ctx, out) => {
 const projectOnScopes = (ctx, data) => {
   if (!ctx.model) {
     events.emit('log/DEBUG', {
+      domain: ctx.domain,
       channel: 'mw',
       msg: 'mw.projectOnScopes - No model provided, ignoring projection',
       data: {path: ctx.path}
@@ -182,6 +184,7 @@ const projectOnScopes = (ctx, data) => {
 const preventBogusPayloadKeys = ctx => {
   if (!ctx.model) {
     return events.emit('log/DEBUG', {
+      domain: ctx.domain,
       channel: 'mw',
       msg: 'No `model` set on ' + ctx.path,
       data: {path: ctx.path}
@@ -208,6 +211,7 @@ const preventBogusPayloadKeys = ctx => {
 
 const debug = (opts = {msg: ''}) => (ctx, out) => {
   events.emit('log/DEBUG', {
+    domain: ctx.domain,
     channel: 'mw',
     msg: opts.msg,
     data: {path: ctx.path, payload: out}
@@ -272,6 +276,7 @@ function _vld (model, data = {}, opts = {}, ctx) {
     // This is an INTERNAL failure - it means the definition block is missing
     // a Skematic model but still calling validate in its `fns`
     events.emit('log/WARN', {
+      domain: ctx.domain,
       channel: 'mw',
       msg: 'No model defined on the context definition',
       data: {path: ctx.path}
@@ -285,6 +290,7 @@ function _vld (model, data = {}, opts = {}, ctx) {
   const vx = validate(model, data, opts)
 
   events.emit('log/TRACE', {
+    domain: ctx.domain,
     channel: 'mw',
     msg: 'Validation output',
     data: {path: ctx.path, validator: vx}

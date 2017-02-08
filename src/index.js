@@ -19,9 +19,11 @@ const {run, compose} = require('./core')
   @return {Object} Runnable SDK
 */
 
-const generate = defs => defs.reduce((sdk, m) => {
+const generate = (defs, opts = {}) => defs.reduce((sdk, m) => {
   // Force requirement to define both `path` and `fns`
   if (!m.path || !m.fns) throw new Error('Must declare `path` and `fns`')
+
+  if (opts.domain) m.domain = opts.domain
 
   Scopes.register(m.path, m.scopes)
   sdk[m.path] = run.bind(null, m)
@@ -31,6 +33,7 @@ const generate = defs => defs.reduce((sdk, m) => {
   sdk[m.path].model = m.model
   sdk[m.path].path = m.path
   sdk[m.path].meta = m.meta || {}
+  if (opts.domain) sdk[m.path].domain = opts.domain
 
   return sdk
 }, {})

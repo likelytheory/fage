@@ -82,6 +82,7 @@ function makeRoute (key, fn) {
   // No method was derived, do not attempt to setup a route
   if (!method) {
     events.emit('log/TRACE', {
+      domain: fn.domain,
       channel: 'rest',
       msg: `Skip unknown route ${path}`
     })
@@ -90,6 +91,7 @@ function makeRoute (key, fn) {
 
   // Log the setup of the path
   events.emit('log/TRACE', {
+    domain: fn.domain,
     channel: 'rest',
     msg: `Add route ${method}, ${path}`
   })
@@ -116,6 +118,7 @@ function makeRoute (key, fn) {
     // Using the `ctx.originalUrl` shows the full HTTP request URL rather than
     // _just_ the `path` (which means mounted apps on sub-paths show up here)
     events.emit('log/INFO', {
+      domain: fn.domain,
       channel: 'http',
       msg: `${method} ${ctx.originalUrl} ${(new Date()).toISOString()}`
     })

@@ -6,7 +6,7 @@ const mount = require('koa-mount')
 
 // Internal tool imports
 const events = require('../../events')
-const debugResponses = require('./debug')
+const debug = require('./debug')
 const errorHandler = require('./error')
 const notFoundHandler = require('./404')
 
@@ -48,7 +48,11 @@ function buildAPI (sdk, {
 } = {}) {
   if (!path) throw new Error('[api.rest] Must specify `path` to mount API')
 
+  // Get the domain to use for logging, if any
+  const domain = sdk[Object.keys(sdk)[0]].domain
+
   events.emit('log/INFO', {
+    domain,
     channel: 'rest',
     msg: 'New App Mounting on: ' + path
   })
@@ -76,7 +80,12 @@ function buildAPI (sdk, {
   if (middleware) middleware.forEach(mw => app.use(mw))
 
   // Apply debug info to responses if 'root' user or debug header on X-API-Debug
-  app.use(debugResponses)
+  app.use(debug)
+  events.emit('log/DEBUG', {
+    domain,
+    channel: 'rest',
+    msg: 'Debug header: ' + debug.API_HDR + ' ' + debug.API_DEBUG
+  })
 
   // The router is automatically built by the API definition loader
   const router = require('./route')(sdk)
