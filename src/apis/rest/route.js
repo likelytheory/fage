@@ -113,9 +113,11 @@ function makeRoute (key, fn) {
     }
 
     // Log the API call request
+    // Using the `ctx.originalUrl` shows the full HTTP request URL rather than
+    // _just_ the `path` (which means mounted apps on sub-paths show up here)
     events.emit('log/INFO', {
       channel: 'http',
-      msg: `${method} ${path} ${(new Date()).toISOString()}`
+      msg: `${method} ${ctx.originalUrl} ${(new Date()).toISOString()}`
     })
 
     const refInfo = {path: key, scopes: fn.scopes}
