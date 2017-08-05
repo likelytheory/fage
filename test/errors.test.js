@@ -59,6 +59,6 @@ test('Params are added only if present', t => {
   t.is(Object.keys(out).indexOf('errors'), -1)
 
   out = errors.fatal({code: '123', debug: 'Oh!', errors: ['yep']})
-  const expected = ['type', 'status', 'code', 'debug', 'errors'].sort()
+  const expected = ['message', 'type', 'status', 'code', 'debug', 'errors'].sort()
   t.deepEqual(Object.keys(out).sort(), expected)
 })

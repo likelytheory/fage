@@ -1,6 +1,6 @@
 
 /**
-  Standardised rich Error generator
+  Standardised rich error generator
 
   @param {Number} status The HTTP status code associated with the error
   @param {String} type A unique type for this error eg. Validation, NotLoggedIn
@@ -8,7 +8,7 @@
   @param {Mixed} [debug] Debug information attached to the error
   @param {Object} [errors] Extra errors object
 
-  @returns {Error} with {status, type, debug} fields
+  @returns {Object} with {message, status, type, debug} fields
 */
 
 function buildError ({status, type, msg, code, debug, errors}) {
@@ -16,7 +16,7 @@ function buildError ({status, type, msg, code, debug, errors}) {
     throw new Error('MUST provide error builder `status` and `type` props')
   }
 
-  let error = new Error(msg || type)
+  let error = {message: msg || type}
   error.type = type
   error.status = status
 
