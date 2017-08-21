@@ -9,12 +9,12 @@
   "author": "",
   "license": "UNLICENSED",
   "dependencies": {
-    "eventemitter3": "^2.0.2",
+    "eventemitter3": "^2.0.3",
     "skematic": "^2.2.3"
   },
   "devDependencies": {
-    "ava": "^0.17.0",
-    "testdouble": "^1.11.0"
+    "ava": "^0.22.0",
+    "testdouble": "^3.2.4"
   },
   "peerDependencies": {
     "basic-auth": "^1.1.0",
