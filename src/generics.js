@@ -115,12 +115,15 @@ const read = DB => (table, {
 */
 
 const remove = DB => (table, {
-  db = {}
+  qry = {},
+  onResourceId = false
 } = {}) => compose([
   // First ensure user has appropriate global scope if any on the definition
   mw.verifyScopes,
-  mw.debug({msg: 'Remove is not implemented'}),
-  () => { throw new Error('Not implemented') }
+
+  ctx => onResourceId && setWhereOnDbQuery(ctx, qry),
+
+  ctx => DB.remove(table, qry)
 ])
 
 /*
