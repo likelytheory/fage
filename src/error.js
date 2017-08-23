@@ -4,19 +4,19 @@
 
   @param {Number} status The HTTP status code associated with the error
   @param {String} type A unique type for this error eg. Validation, NotLoggedIn
-  @param {String} [msg] The Error message (default: `type` param)
+  @param {String} [message] The Error message (default: `type` param)
   @param {Mixed} [debug] Debug information attached to the error
   @param {Object} [errors] Extra errors object
 
   @returns {Object} with {message, status, type, debug} fields
 */
 
-function buildError ({status, type, msg, code, debug, errors}) {
+function buildError ({status, type, message, code, debug, errors}) {
   if (!status) {
     throw new Error('MUST provide error builder `status` and `type` props')
   }
 
-  let error = {message: msg || type}
+  let error = {message: message || type}
   error.type = type
   error.status = status
 

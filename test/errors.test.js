@@ -49,8 +49,8 @@ test('Unknown params are ignored', t => {
   t.is(Object.keys(out).indexOf('junk'), -1)
 })
 
-test('Error message is set if passed on `msg`', t => {
-  let out = errors.fatal({msg: 'Omg!'})
+test('Error message is set if passed on `message`', t => {
+  let out = errors.fatal({message: 'Omg!'})
   t.is(out.message, 'Omg!')
 })
 
