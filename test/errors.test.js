@@ -63,3 +63,9 @@ test('Params are added only if present', t => {
   const expected = ['message', 'type', 'status', 'code', 'debug', 'errors'].sort()
   t.deepEqual(Object.keys(out).sort(), expected)
 })
+
+test('Simple set message with `error.[method](\'Message\')`', t => {
+  const er = errors.fatal('Oh yes!')
+
+  t.is(er.message, 'Oh yes!', 'Message should be set on error obj')
+})

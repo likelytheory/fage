@@ -5,13 +5,17 @@
   @param {Number} status The HTTP status code associated with the error
   @param {String} type A unique type for this error eg. Validation, NotLoggedIn
   @param {String} [message] The Error message (default: `type` param)
+  @param {String} [code] An app specific custom error code
   @param {Mixed} [debug] Debug information attached to the error
   @param {Object} [errors] Extra errors object
 
   @returns {Object} with {message, status, type, debug} fields
 */
 
-function buildError ({status, type, message, code, debug, errors}) {
+function buildError (opts) {
+  if (typeof opts === 'string') opts = {message: opts}
+  const {status, type, message, code, debug, errors} = opts
+
   if (!status) {
     throw new Error('MUST provide error builder `status` and `type` props')
   }
@@ -30,6 +34,8 @@ function buildError ({status, type, message, code, debug, errors}) {
 function preBuild (status, type) {
   let eo = {status, type}
   return function errorPartial (opts = {}) {
+    if (typeof opts === 'string') opts = {message: opts}
+
     let pass = Object.assign({}, opts, eo)
     // Allow user specified type to override default
     if (opts.type) pass.type = opts.type
