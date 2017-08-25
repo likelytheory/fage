@@ -11,6 +11,7 @@ test('Errors export defined API', t => {
     'forbidden',
     'notfound',
     'conflict',
+    'ratelimit',
     'fatal',
     'unavailable'
   ].sort()
