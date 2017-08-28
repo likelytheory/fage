@@ -18,7 +18,7 @@ function setWhereOnDbQuery (ctx, qry) {
     throw error.create({
       status: 500,
       type: 'GenericsError',
-      msg: 'No resourceId field set on meta'
+      message: 'No resourceId field set on meta'
     })
   }
   const cond = {id: ctx.meta.resourceId}

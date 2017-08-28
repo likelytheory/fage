@@ -17,7 +17,7 @@ const verifyAuthed = ctx => {
 
   // Not logged in?? UNLEASH THE FUCKING DRAGONS!@!?!!@!@$!@#@!
   throw error.unauthorized({
-    msg: 'Must provide a valid userId on meta channel'
+    message: 'Must provide a valid userId on meta channel'
   })
 }
 
@@ -30,7 +30,7 @@ const _checkScopes = ctx => {
   events.emit('log/TRACE', {
     domain: ctx.domain,
     channel: 'mw',
-    msg: 'mw._checkScopes',
+    message: 'mw._checkScopes',
     data: {required: ctx.scopes, claimed: ctx.meta.scopes, path: ctx.path}
   })
 
@@ -88,7 +88,7 @@ const hasValidScopes = _checkScopes
 const verifyOwnershipOnField = field => (ctx, resource) => {
   if (resource[field] !== ctx.meta.userId) {
     throw error.forbidden({
-      msg: 'Sorry, no permissions to do that on this res'
+      message: 'Sorry, no permissions to do that on this res'
     })
   }
   return resource
@@ -119,7 +119,7 @@ const verifyResourceIdSet = (ctx, out) => {
   if (!ctx.meta.resourceId) {
     throw error.badrequest({
       type: 'NoResourceId',
-      msg: 'Expected to find a `resourceId`',
+      message: 'Expected to find a `resourceId`',
       debug: {path: ctx.path}
     })
   }
@@ -143,7 +143,7 @@ const projectOnScopes = (ctx, data) => {
     events.emit('log/DEBUG', {
       domain: ctx.domain,
       channel: 'mw',
-      msg: 'mw.projectOnScopes - No model provided, ignoring projection',
+      message: 'mw.projectOnScopes - No model provided, ignoring projection',
       data: {path: ctx.path}
     })
     return data
@@ -186,7 +186,7 @@ const preventBogusPayloadKeys = ctx => {
     return events.emit('log/DEBUG', {
       domain: ctx.domain,
       channel: 'mw',
-      msg: 'No `model` set on ' + ctx.path,
+      message: 'No `model` set on ' + ctx.path,
       data: {path: ctx.path}
     })
   }
@@ -197,7 +197,7 @@ const preventBogusPayloadKeys = ctx => {
   // Error if the validation fails
   throw error.badrequest({
     type: 'InvalidPayload',
-    msg: 'Invalid keys in payload: ' + Object.keys(keyCheck.errors).join(', ')
+    message: 'Invalid keys in payload: ' + Object.keys(keyCheck.errors).join(', ')
   })
 }
 
@@ -209,11 +209,11 @@ const preventBogusPayloadKeys = ctx => {
   @return {Function} Middleware that logs message and continues data output
 */
 
-const debug = (opts = {msg: ''}) => (ctx, out) => {
+const debug = (opts = {message: ''}) => (ctx, out) => {
   events.emit('log/DEBUG', {
     domain: ctx.domain,
     channel: 'mw',
-    msg: opts.msg,
+    message: opts.msg,
     data: {path: ctx.path, payload: out}
   })
   return out
@@ -278,12 +278,12 @@ function _vld (model, data = {}, opts = {}, ctx) {
     events.emit('log/WARN', {
       domain: ctx.domain,
       channel: 'mw',
-      msg: 'No model defined on the context definition',
+      message: 'No model defined on the context definition',
       data: {path: ctx.path}
     })
     throw error.fatal({
       type: 'Validation',
-      msg: 'Internal definitions missing Model data'
+      message: 'Internal definitions missing Model data'
     })
   }
 
@@ -292,7 +292,7 @@ function _vld (model, data = {}, opts = {}, ctx) {
   events.emit('log/TRACE', {
     domain: ctx.domain,
     channel: 'mw',
-    msg: 'Validation output',
+    message: 'Validation output',
     data: {path: ctx.path, validator: vx}
   })
 
@@ -301,7 +301,7 @@ function _vld (model, data = {}, opts = {}, ctx) {
   // Fail on validation error - err(status, type, msg, debug, errors)
   throw error.badrequest({
     type: 'Validation',
-    msg: 'Data validation failed',
+    message: 'Data validation failed',
     errors: vx.errors
   })
 }
