@@ -52,6 +52,7 @@ const create = DB => (table, {
 const update = DB => (table, {
   qry = {},
   onResourceId = false,
+  projectModel,
   requireAuth = true
 } = {}) => compose([
   // Does user need to be logged in
@@ -63,12 +64,18 @@ const update = DB => (table, {
   // Set a `where` query on the `qry` object if resource Id passed. MUTATES qry.
   ctx => (onResourceId) && setWhereOnDbQuery(ctx, qry),
 
+  // Return all fields on update
+  ctx => (qry.returning = '*'),
+
   // Prepare the payload
   mw.format.raw({defaults: false}),
   mw.validate.out(),
 
-  (ctx, toSave) => DB.update(table, qry, toSave)
+  (ctx, toSave) => DB.update(table, qry, toSave),
 
+  // Project only the fields we have permission for
+  // Can override the ctx model with a projection model `projectModel`
+  (ctx, out) => mw.projectOnScopes({model: projectModel || ctx.model}, out)
 ])
 
 /**
