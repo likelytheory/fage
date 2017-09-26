@@ -17,7 +17,8 @@ const verifyAuthed = ctx => {
 
   // Not logged in?? UNLEASH THE FUCKING DRAGONS!@!?!!@!@$!@#@!
   throw error.unauthorized({
-    message: 'Must provide a valid userId on meta channel'
+    message: 'Not logged in',
+    debug: 'Must provide a valid userId on meta channel'
   })
 }
 
