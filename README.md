@@ -1,8 +1,167 @@
 # fage
 
-> Declarative sequential function runner
+> Declarative sequential async middleware runner
 
-Create named arrays of Promise middleware that pass the output of their call to the next middleware in the chain.
+A reducer for running an array of middleware methods, passing each an app context object and the output of each call to the next middleware in the chain.
+
+Middleware methods are called with `mw(context, output)`:
+
+1. **context**: is an object `{input, meta}` where `input` is arbitrary user provided input, and `meta` is an application defined object, and;
+2. **output** is the return result of the previous middleware
+
+This approach allows composing apps as middleware and decouples the application _interface_ from its _implementation_.
+
+---
+- [**Overview**](#overview): the Fage basics
+- [**Install**](#install): getting Fage into your project
+- _How to use Fage: object structure for method blocks_ Coming soon
+- **Middleware**
+  - `context` parameter
+- Database
+- **Generics**
+---
+
+## Overview
+
+#### Write a Fage method block
+
+```js
+import {nyanSay} from './mycode'
+
+const myIsAuthedMiddleware = (ctx) => {
+  if (!ctx.meta.loggedIn) throw new Error('Not Logged In')
+}
+
+// Example Fage method block:
+export default {
+  path: 'nyanExclaim',
+  fns: [
+    myIsAuthedMiddleware, // throws if ctx.meta.loggedIn not set
+    (ctx) => ctx.input + '!@#!!',
+    (ctx, output) => (nyanSay(output), output) // returns output
+  ]
+}
+```
+
+#### Package into an app
+Fage can then package this app logic into a shallow object keyed by the `path` (or can run the object block explicitly using `fage.run(<block>, input, meta)`):
+
+```js
+import fage from 'fage'
+import nyanExclaim from './exampleAbove'
+
+export const app = fage.package([nyanExclaim])
+// -> {nyanExclaim: Function}
+
+await app.nyanExclaim('meow meow', {loggedIn: true})
+// OR: await fage.run(nyanExclaim, 'meow meow', {loggedIn: true})
+//                    ,---/V\     ________________
+// ,*'^`*.,*'^`*.    ~|__(o.o) __/ meow meow!@#!! \
+// .,*'^`*.,*'^`*.,*'  UU  UU  `------------------`
+// -> "meow meow!@#!!"
+```
+
+Failing to provide a `loggedIn` value on the `meta` parameter will trigger an Auth error in our method block:
+```js
+await app.nyanExclaim('meow meow')
+// -> Error: Not Logged In
+```
+
+#### Why this is cool
+App logic can be composed as middleware. The packaged app is decoupled from any interface (making it very testable, and easy to reason about). This also allows you define arbitrary API maps for your interfaces, completely independently of your app logic. It gets even better with generative interfaces, but the principle is still powerful, even in manual mode:
+
+```js
+import app from './myFagePackagedApp'
+
+// Also import hypothetical custom server interfaces
+import {socketsrv, parseSoc} = './myInterfaces/socket'
+import {httpsrv, parseReq} = './myInterfaces/httpsrv'
+
+// Now wire up a socket API to your logic
+socketsrv.on('user.login', parseSoc, data => app.usersLogin(data.body, data.meta))
+socketsrv.on('say.nyansay', parseSoc, data => app.nyanExclaim(data.body, data.meta))
+socketsrv.listen(3211)
+
+// And/or an HTTP interface (...or any other interface!)
+httpsrv.post('/users/login', parseReq, (req, res) => {
+   res.json(app.usersLogin(req.state.body, req.state.meta))
+})
+httpsrv.post('/say/nyan', parseHttpReq, (req, res) => {
+  res.json(app.nyanExclaim(req.state.body, req.state.meta))
+})
+httpsrv.on('error', (err, req, res, next)
+```
+
+
+## Install
+Fage is a private repository for which you will require a Github token.
+
+> TODO: Insert a howto for this
+
+At which point you can install from Github as follows:
+
+```bash
+$ npm install likelytheory/fage
+```
+
+
+## Overview
+A **fage** method sequentially runs each "middleware" function in an array, passing a `ctx` **context variable** as well as the **output results** of the previous function eg. `mw(ctx, prevOutput)`. This `fns` array is bundled as an object with a `path` unique identifier to create a Fage method:
+
+```javascript
+import {squareInputMiddleware} from './myAppLogic'
+
+// An example Fage method:
+const mySquaringMethod = {
+  path: 'numberSquare',
+  fns: [squareInputMiddleware]
+}
+```
+
+**Fage** lets you call these methods with two parameters: 1) any `userData` you want to process, and 2) any application `metaData` you want to pass. It returns a _Promise_ that either throws an error or resolves to your final result.
+
+```javascript
+await fage.run(myMethod, 4)
+// -> 16
+```
+
+The `path` is used to create a shallow hashmap object of your application methods, using the factory `fage(arrayOfAppMethods)`. This 'bundle' acts as a simple API, where the `path`s uniquely identify the endpoints, making it easy to write decoupled interfaces that call into this API. For example:
+
+```javascript
+import fage from 'fage'
+import mySquaringMethod from './methods/squaring'
+import speakMethods from './methods/speak'
+
+const sdk = fage([mySquaringMethod, ...otherMethods])
+// -> {numberSquare: Function, cowSay: Function, nyanSay: Function}
+
+sdk.nyanSay('meow meow')
+//                    ,---/V\     ___________
+// ,*'^`*.,*'^`*.    ~|__(o.o) __/ meow meow \
+// .,*'^`*.,*'^`*.,*'  UU  UU  `-------------`
+
+export default sdk
+```
+
+The neat thing about this is now we have our `api` available, we can call it _from any interface_. Importantly, you can also pass application derived information as a second parameter:
+
+```javascript
+sdk.nyanSay('meow!', {
+  userId: 'zim12',
+  scopes: ['admin'],
+  custom: 'red'
+})
+```
+
+Middleware functions receive these arguments as fields on the context `ctx` variable which exposes:
+
+- **path**: The unique identifier for the method being called
+- **ref**:
+- **data**: The user data passed as the first argument (eg. `'meow'`)
+- **meta**:
+
+**The context `ctx` variable**
+
 
 Define application actions as objects comprising:
 
@@ -12,6 +171,10 @@ Define application actions as objects comprising:
 - **fns**: Array of functions to sequentially run
 
 Combining this approach with a format and validation engine can allow creation of remarkably concise and declarative applications.
+
+## Middleware
+Middleware are functions that accept two parameters, a `ctx` **context variable** as and the **output results** of the previous middleware. Middleware MUST return either a `Promise` or a `value`, but _not_ `undefined`.
+
 
 Relies on writing an **interface** layer that:
 
@@ -101,7 +264,7 @@ Where this gets interesting:
 const {checkPermissions, validateInputs, formatUserData, saveToDB, log} = require('./myAppLogic')
 
 const createPost = {
-  path: 'post.create',
+  path: 'posts.create',
   fns: [
     ctx => checkPermissions(ctx.meta.scopes),
     ctx => validateInputs(ctx.raw),
@@ -152,4 +315,4 @@ In other words a function is provided the table name and some database options, 
 
 ## Development
 
-Written using Node 6 ES6, specfically to run _without_ Babel transpilation.
+Written using Node 6 compatible ES6, specfically to run _without_ Babel transpilation.
