@@ -105,6 +105,149 @@ $ npm install likelytheory/fage
 ```
 
 
+
+
+
+
+---
+
+- [**Using Fage Methods**](#usingfagemethods)
+- [**Method Blocks**](#methodblocks)
+- [**Middleware**](#middleware)
+- [**`ctx` context object**](#ctxcontextobject)
+- [**API**](#api)
+
+---
+
+## Using Fage methods
+
+Once you have setup a Fage Application Object (`const app = fage(methodBlocks)`), you can invoke each with `app.<method>(input, meta)` params, which returns a `Promise` that resolves as the output result or rejects as any thrown Error.
+
+Fage Application Objects expose Fage methods that expect to be called with two "channel" parameters (_both optional_):
+
+```js
+app.method(input, meta)
+// -> Promise
+```
+
+**Fage is intended to be invoked by a separate and independent _interface_** (read more about interfaces here).
+
+These interfaces should accept user input of some kind (`input`), attach extra system or app derived data (`meta`), and map their calls to an appropriate Fage method.
+
+It's the interface's job to _separate the data channels for Fage_:
+
+- `input` is any input data provided by the end user.
+- `meta` is any data that your _interface_ sets (ie. trusted data)
+
+
+**For example**: an HTTP interface might listen for a `POST /hello` - when called (with say `"world"`) it may first do auth token validation and set a few environment system values eg. `{userId: null, turbo: false}` - the `meta` channel is the mechanism for passing this application environment data to Fage. The interface would then call:
+
+```js
+await app.hello("world", {userId: null, turbo: false})
+// -> "hello world!"
+```
+
+The _interface_ would then utilise the output of the Fage method (here: `"hello world!`") however it wanted.
+
+
+## Method Blocks
+
+A Fage **Method Block** is a simple object, mainly comprising a `path` to uniquely identify the block and an array of `fns` that are the middleware functions.
+
+- `path`: **String**: Uniquely identifies the method block
+- `fns`: **Array**: An array of Fage Middleware
+- `ref`: **Object** _(Optional)_: Custom
+
+
+## Middleware
+
+Fage middleware are functions that accept two parameters `mw(ctx, output)`, and optionally return an output. These middleware are what Fage chains together, passing the output of each previous function into the next.
+
+
+## `ctx` context object
+The context `ctx` object is passed as the first parameter to every middleware.
+
+The two data channels are available on `ctx` as:
+
+- `input`: **Any** - The "user supplied" _input data_ channel
+- `meta`: **Object** - The application/interface set _meta data_ channel
+
+In addtion, underlying _method block_ values are also provided:
+
+- `path`: **String** - The unique `path` value for the underlying method block
+- `ref`: **Object** - Any `ref` data set in the underlying method block
+
+The context object is _immutable_ except for its `state` parameter, which middleware may choose to use to store stateful info if returning its output is insufficient.
+
+- `state`: **Any** - A mutable field to store data
+
+
+## API
+
+The primary API for Fage is the single factory call `fage()`.
+
+### fage(methodBlocksArray)
+
+Packages the methodBlocks in `methodBlocksArray` into a shallow object of runnable functions keyed by each method block's `path` value.
+
+```js
+import fage from 'fage'
+
+const mw = (ctx) => `hello ${ctx.input}!`
+const greeterBlock = {path: 'hello', fns: [mw]}
+const app = fage([greeterBlock])
+// -> {hello: Function}
+
+await app.hello('world')
+// -> "hello world!"
+```
+
+Parameters:
+
+- `methodBlocksArray`: **Array** - An array of Fage method blocks
+
+Returns:
+- **Fage Application Object**: Flat object of runnable functions keyed by each method block's `path` value.
+
+---
+
+**Helper API methods**
+There are also a handful of helper methods that may be of use during development of Fage apps:
+
+
+### fage.run(methodBlock[, input, meta])
+
+Runs a specific method block object.
+
+> Note: This is essentially what the factory `fage()` method uses to bind a method block to run as a Function.
+
+```js
+// Using the example from `fage()` above
+fage.run(greeterBlock, 'earth')
+// -> "hello earth!"
+```
+
+Parameters:
+- `methodBlock`: **MethodBlock Object** - a Fage method block object
+- `input`: **Any** - _(Optional)_ - any userland input data
+- `meta`: **Object** - _(Optional)_ - application defined meta data
+
+Returns:
+- **Any**: The final output of the method block's `fns`
+
+
+
+---
+
+
+
+
+
+
+
+
+
+
 ## Overview
 A **fage** method sequentially runs each "middleware" function in an array, passing a `ctx` **context variable** as well as the **output results** of the previous function eg. `mw(ctx, prevOutput)`. This `fns` array is bundled as an object with a `path` unique identifier to create a Fage method:
 
