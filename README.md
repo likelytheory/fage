@@ -44,13 +44,13 @@ export default {
 ```
 
 #### Package into an app
-Fage can then package this app logic into a shallow object keyed by the `path` (or can run the object block explicitly using `fage.run(<block>, input, meta)`):
+Fage can then package this app logic into a shallow object of runnable methods keyed by the `path` (or can run a raw object block explicitly using `fage.run(<block>, input, meta)`):
 
 ```js
 import fage from 'fage'
 import nyanExclaim from './exampleAbove'
 
-export const app = fage.package([nyanExclaim])
+export const app = fage([nyanExclaim])
 // -> {nyanExclaim: Function}
 
 await app.nyanExclaim('meow meow', {loggedIn: true})
@@ -89,7 +89,7 @@ httpsrv.post('/users/login', parseReq, (req, res) => {
 httpsrv.post('/say/nyan', parseHttpReq, (req, res) => {
   res.json(app.nyanExclaim(req.state.body, req.state.meta))
 })
-httpsrv.on('error', (err, req, res, next)
+httpsrv.on('error', (err, req, res, next))
 ```
 
 
