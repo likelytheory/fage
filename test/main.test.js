@@ -5,7 +5,7 @@ import generate from '../src/index'
 const def = {
   path: 'do.nothing',
   fns: [
-    (api, out) => 'magic'
+    (ctx, out) => 'magic'
   ]
 }
 
@@ -26,7 +26,7 @@ test('Engine export provides expected API', t => {
   )
 })
 
-test('generate(defs) produces path-keyed `sdk`', t => {
+test('generate([blocks]) produces path-keyed `app`', t => {
   t.throws(
     () => generate(def), null,
     'Requires array as argument'
@@ -37,14 +37,14 @@ test('generate(defs) produces path-keyed `sdk`', t => {
     'Requires valid definition object'
   )
 
-  const sdk = generate([def])
+  const app = generate([def])
   t.true(
-    typeof sdk['do.nothing'] === 'function',
+    typeof app['do.nothing'] === 'function',
     'generate(defs) creates a keyed object by pathname'
   )
 
   // Setup the return value
-  const ret = sdk['do.nothing']()
+  const ret = app['do.nothing']()
 
   t.true(
     !!ret.then,
@@ -59,13 +59,13 @@ test('generate(defs) produces path-keyed `sdk`', t => {
   })
 })
 
-test('sdk.onError handler runs on thrown error if set on API block', t => {
+test('block.onError handler runs on thrown error if set on method block', t => {
   t.plan(3)
 
-  const onErr = function (api, out) {
+  const onErr = function (ctx, out) {
     t.true(
-      api.path === 'demo.throw',
-      'Confirm onError receives `api` block as first param'
+      ctx.path === 'demo.throw',
+      'Confirm onError receives `ctx` block as first param'
     )
 
     t.true(
@@ -74,17 +74,37 @@ test('sdk.onError handler runs on thrown error if set on API block', t => {
     )
   }
 
-  const sdk = generate([{
+  const app = generate([{
     path: 'demo.throw',
     onError: onErr,
     fns: [() => { throw new Error('boom') }]
   }])
 
-  return sdk['demo.throw']()
+  return app['demo.throw']()
     .catch(err => {
       t.true(
         err.message === 'boom',
         'Caught middleware thrown output Error'
+      )
+    });
+})
+
+test('block.onError handler has thrown errors suppressed', t => {
+  const onErr = function (ctx, out) {
+    throw new Error('moop!')
+  }
+
+  const app = generate([{
+    path: 'dothrow',
+    onError: onErr,
+    fns: [() => { throw new Error('boom') }]
+  }])
+
+  return app.dothrow()
+    .catch(err => {
+      t.true(
+        err.message === 'boom',
+        'Expected `moop!` to be suppressed'
       )
     })
 })

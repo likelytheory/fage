@@ -57,8 +57,9 @@ const step = (fns, ctx, initial = null) => {
   }, initial)
     // Catch errors and apply any 'onError' handler if present
     .catch(error => {
-      if (ctx.onError) ctx.onError(ctx, error)
-      // Pass the error along
+      // Ignore any thrown errors in the onError handler
+      if (ctx.onError) try { ctx.onError(ctx, error) } catch (ignore) {}
+      // Pass the original error along
       throw error
     })
 }

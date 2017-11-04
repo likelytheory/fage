@@ -143,7 +143,16 @@ A Fage **Method Block** is a simple object, mainly comprising a `path` to unique
 - `path`: **String**: Uniquely identifies the method block
 - `fns`: **Array**: An array of Fage Middleware
 - `ref`: **Object** _(Optional)_: Custom block data for use by middleware
+- `onError`: **Function(ctx, err)** _(Optional)_: Hook to observe errors thrown by middleware
 
+**Notes for `onError`**
+In general, errors should be handled by your **interface layer** and not by Fage itself (which should simply generate errors to be handled).
+
+However, the _optional_ `onError` hook is a function that is invoked if the method block throws an Error, and can be used to 'observe' (but not obstruct or 'catch') middlware failure states. The onError function receives two parameters: the `ctx` context object and the thrown `Error` object, eg. `(ctx, err)`.
+
+Note that `onError` functions are run synchronously, any return values are _discarded_ and any exceptions in the hook are silently suppressed, so only the original error is propagated.
+
+**Example Method Block**
 For example (providing a bunch of code and middleware imported from elsewhere):
 
 ```js
@@ -154,6 +163,7 @@ const example = {
     nonsense: 'oh yes!', // Some farcical key
     scopes: ['admin']    // Specify admin scopes
   },
+  onError: (ctx, err) => errorLogHandler(err),
   fns: [
     mw.ensure.isAuthed,   // Checks ctx.meta.user
     mw.ensure.hasScopes,  // Checks ctx.ref.scopes
