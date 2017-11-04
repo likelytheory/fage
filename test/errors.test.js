@@ -42,6 +42,11 @@ test('HTTP types match expectation', t => {
   t.is(errors.unavailable().type, 'Unavailable')
 })
 
+test('Error object is an Error Type', t => {
+  const er = errors.create({status: 1, type: 'Test'})
+  t.true(er instanceof Error, 'errors should be instanceof Error')
+})
+
 test('Prebuilt errors can override type but not status', t => {
   t.is(errors.badrequest({status: '111'}).status, 400)
   t.is(errors.badrequest({type: 'derp'}).type, 'derp')

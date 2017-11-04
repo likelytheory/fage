@@ -6,7 +6,7 @@
   @param {String} type A unique type for this error eg. Validation, NotLoggedIn
   @param {String} [message] The Error message (default: `type` param)
   @param {String} [code] An app specific custom error code
-  @param {Mixed} [debug] Debug information attached to the error
+  @param {Mixed} [debug] Debug information for DEVELOPERS
   @param {Object} [errors] Extra errors object
 
   @returns {Object} with {message, status, type, debug} fields
@@ -20,7 +20,8 @@ function buildError (opts) {
     throw new Error('MUST provide error builder `status` and `type` props')
   }
 
-  let error = {message: message || type}
+  let error = new Error()
+  error.message = message || type
   error.type = type
   error.status = status
 
