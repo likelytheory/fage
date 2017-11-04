@@ -16,8 +16,6 @@ Fage functions can be invoked by independent _interfaces_ that map their interfa
 
 > Fage (fayj) - a phage is used to carry code for execution. It's also a **f**-unction c-**age**.
 
-
-
 ---
 
 Getting Started:
@@ -141,7 +139,7 @@ The _interface_ would then utilise the output of the Fage method (`"hello world!
 A Fage **Method Block** is a simple object, mainly comprising a `path` to uniquely identify the block and an array of `fns` that are the middleware functions.
 
 - `path`: **String**: Uniquely identifies the method block
-- `fns`: **Array**: An array of Fage Middleware
+- `fns`: **Array[Functions]**: An array of Fage Middleware
 - `ref`: **Object** _(Optional)_: Custom block data for use by middleware
 - `onError`: **Function(ctx, err)** _(Optional)_: Hook to observe errors thrown by middleware
 
@@ -374,55 +372,7 @@ server.listen(5000)
 ```
 
 
-
-## Generics
-
-The Generics are predefined sets of middleware that use Skematic `format()` and `validate()` methods to provide ready-to-use validated, formatted, permission checked handlers for `create`, `update`, `list` and `remove`.
-
-## DB middleware bridge
-
-> Note: It is not necessary to provide a DB bridge unless using Generics. However, it is still quite useful, and following the bridge-middleware conventions are recommended
-
-Datastore access is provided by middleware bridges supporting `create`, `update`, `save`, `list`, `read` and `remove` methods. The signature follows:
-
-```js
-{<method>: (tableName, opts) => (ctx, out) => <getMyResults>(table, opts, ...)}
-```
-
-In other words a function is provided the table name and some database options, and then returns a standard middleware function returning the required results, either as a Promise or as the results directly.
-
-
-## Why Fage (an architectural discussion)
-
-On face value Fage may appear to be window dressing. After all, why go to the trouble of wrapping app logic in objects (Fage "method blocks")?
-
-Why do this:
-
-```js
-import fage from 'fage'
-import hackThePlanet from './mycode'
-const superHack = {
-  path: 'superHack',
-  fns: [(ctx) => hackThePlanet(ctx.input)]
-}
-export default fage([superHack])
-```
-```js
-import app from './above'
-server.on('eliteHack', checkPermissions, (req, res) => {
-  const out = await app.superHack(req.body)
-    res.json(out)
-})
-```
-
-Surely this is simpler:
-
-```js
-import hackThePlanet from './mycode'
-server.on('eliteHack', checkPermissions, (req, res) => {})
-```
-
-
 ## Development
 
-Written using Node 6 compatible ES6, specfically to run _without_ Babel transpilation. Note that if you are using `async/await` notation, you will need to be running Node 7.6+.
+**Native to Node 6+**
+Written using Node 6+ compatible ES6, specfically to run natively (i.e. _without_ needing transpilation). Note that if you are using `async/await` notation in your app design, you will need to be running Node 7.6+.
