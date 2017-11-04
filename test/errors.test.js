@@ -27,6 +27,7 @@ test('HTTP statuses match expectation', t => {
   t.is(errors.forbidden().status, 403)
   t.is(errors.notfound().status, 404)
   t.is(errors.conflict().status, 409)
+  t.is(errors.ratelimit().status, 429)
   t.is(errors.fatal().status, 500)
 })
 
@@ -36,6 +37,7 @@ test('HTTP types match expectation', t => {
   t.is(errors.forbidden().type, 'Forbidden')
   t.is(errors.notfound().type, 'NotFound')
   t.is(errors.conflict().type, 'Conflict')
+  t.is(errors.ratelimit().type, 'TooManyRequests')
   t.is(errors.fatal().type, 'ServerError')
   t.is(errors.unavailable().type, 'Unavailable')
 })
