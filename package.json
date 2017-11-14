@@ -15,6 +15,7 @@
   "devDependencies": {
     "ava": "^0.22.0",
     "testdouble": "^3.2.4"
+    "standard": "10.0.3",
   },
   "peerDependencies": {
     "basic-auth": "^1.1.0",
