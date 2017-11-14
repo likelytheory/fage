@@ -13,9 +13,9 @@
     "skematic": "^2.2.3"
   },
   "devDependencies": {
-    "ava": "^0.22.0",
-    "testdouble": "^3.2.4"
+    "ava": "^0.23.0",
     "standard": "10.0.3",
+    "testdouble": "^3.2.6"
   },
   "peerDependencies": {
     "basic-auth": "^1.1.0",
