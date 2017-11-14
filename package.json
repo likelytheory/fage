@@ -1,7 +1,7 @@
 {
   "name": "fage",
   "version": "0.1.0",
-  "description": "Chained function runner",
+  "description": "Declarative middleware runner",
   "main": "src/index.js",
   "scripts": {
     "test": "ava"
