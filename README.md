@@ -4,15 +4,17 @@
 
 Fage is an ultra-lightweight wrapper and function runner that enables **composing apps as middleware** and **decouples the application _interface_ from its _implementation_.**
 
-> If you know Express, imagine your "paths" are just a key on an object `{path: 'createUser'}` (rather than `app.post('/users')`) with your middleware on `{fns: [mw...]}`. So your app is just collection of lightweight objects that can be plugged into any interface (including Express).
+Using Fage:
 
-To do this, first define "[method blocks](#method-blocks)", which are objects named with a unique `path` and containing an array of "[middleware](#middleware)" method `fns`.
+- Define objects with a unique `path` name and an array of "[middleware](#middleware)" functions `fns`. These objects are your "[method blocks](#method-blocks)".
 
-These blocks are bundled by `fage(methodBlocksArray)` into a flat object of runnable functions, keyed by each method blocks's `path` value.
+- These method blocks are bundled by `fage(arrayOfMethodBlocks)` into a flat object of **runnable functions**, keyed by each method blocks's `path` value.
 
-Each function is effectively a reducer for running the middleware `fns`, passing each middlware a `ctx` [context object](#ctx-context-object) as well as the `output` of each call to the next middleware in the chain, returning a Promise that resolves as the final middleware output.
+- Each function is a reducer that runs the middleware `fns`, passing each fn: a) the `ctx` [context object](#ctx-context-object) and b) the `output` of each call to the next function in the chain, returning a Promise that resolves as the final middleware output.
 
-Fage functions can be invoked by independent _interfaces_ that map their interface calls, inputs and application data to named Fage functions. This decouples the interface from the underlying app logic, which itself can be composed as middleware.
+- Fage functions can be invoked by independent _interfaces_ that map their interface calls, inputs and application data to named Fage functions. This decouples the interface from the underlying app logic, which itself can be composed as middleware.
+
+Your app becomes a collection of lightweight objects that can be plugged into any interface (including HTTP, sockets, RPC, CLI etc).
 
 > Fage (fayj) - a phage is used to carry code for execution. It's also a **f**-unction c-**age**.
 
