@@ -17,11 +17,11 @@ const app = Fage([myFageLogin, ...])
 express.post('/login', myMiddleware, (req, res) => app.userLogin(req.body, req.state.CustomAppData))
 ```
 
-Using Fage:
+Using Fage (or jump to the [example](#example)):
 
 - **Create logic blocks**: Define objects with a unique `path` name and an array of "[middleware](#middleware)" functions `fns`. These objects are your "[method blocks](#method-blocks)".
 
-- **Package into functions**: These method blocks are bundled by `fage(arrayOfMethodBlocks)` into a flat object of _runnable functions_, keyed by each method blocks's `path` value.
+- **Package into functions**: These method blocks are bundled by `Fage(arrayOfMethodBlocks)` into a flat object of _runnable functions_, keyed by each method blocks's `path` value.
 
 - **Run functions**: Each function is a reducer that runs the middleware `fns`, passing each fn: a) the `ctx` [context object](#ctx-context-object) and b) the `output` of each call to the next function in the chain, returning a Promise that resolves as the final middleware output.
 
@@ -87,14 +87,14 @@ modules.export = {
 Fage bundles this app logic into a flat object of _runnable functions_ keyed by the `path`:
 
 ```js
-const fage = require('fage')
+const Fage = require('fage')
 const nyanExclaim = require('./exampleAbove')
 
-const app = fage([nyanExclaim])
+const app = Fage([nyanExclaim])
 // -> {nyanExclaim: Function}
 
 await app.nyanExclaim('meow meow', {loggedIn: true})
-// OR: await fage.run(nyanExclaim, 'meow meow', {loggedIn: true})
+// OR: await Fage.run(nyanExclaim, 'meow meow', {loggedIn: true})
 //                    ,---/V\     ________________
 // ,*'^`*.,*'^`*.    ~|__(o.o) __/ meow meow!@#!! \
 // .,*'^`*.,*'^`*.,*'  UU  UU  `------------------`
@@ -117,7 +117,7 @@ App logic can be composed as middleware. The bundled app is decoupled from any i
 Once you have setup a Fage Application Object:
 
 ```js
-const app = fage(methodBlocks)
+const app = Fage(methodBlocks)
 ```
 
 Invoke named `path` functions with `app.<path>(input, meta)` params, which returns a `Promise` that resolves as the output result or rejects as any thrown Error.
@@ -205,7 +205,7 @@ const sleepMw = (ctx) => sleepFor('30m').then(() => 'morning')
 const logMw = (ctx, out) => console.log(`${out} ${ctx.input}!`)
 
 const blk = {path: 'sleepy', fns: [checkMw, sleepMw, logMw]}
-const app = fage([blk])
+const app = Fage([blk])
 
 await app.sleepy('harold')
 // -> Error: No harolds!
@@ -243,18 +243,18 @@ The context object is _immutable_ except for its `state` parameter, which middle
 
 ## API
 
-The primary API for Fage is the single factory call `fage()`.
+The primary API for Fage is the single factory call `Fage()`.
 
-### fage(methodBlocksArray)
+### Fage(methodBlocksArray)
 
 Packages the methodBlocks in `methodBlocksArray` into a shallow object of runnable functions keyed by each method block's `path` value.
 
 ```js
-import fage from 'fage'
+const Fage = require('fage')
 
 const mw = (ctx) => `hello ${ctx.input}!`
 const greeterBlock = {path: 'hello', fns: [mw]}
-const app = fage([greeterBlock])
+const app = Fage([greeterBlock])
 // -> {hello: Function}
 
 await app.hello('world')
@@ -274,15 +274,15 @@ Returns:
 There are also a handful of helper methods that may be of use during development of Fage apps:
 
 
-### fage.run(methodBlock[, input, meta])
+### Fage.run(methodBlock[, input, meta])
 
 Runs a specific method block object.
 
-> Note: This is essentially what the factory `fage()` method uses to bind a method block to run as a Function.
+> Note: This is essentially what the factory `Fage()` method uses to bind a method block to run as a Function.
 
 ```js
-// Using the example from `fage()` above
-fage.run(greeterBlock, 'earth')
+// Using the example from `Fage()` above
+Fage.run(greeterBlock, 'earth')
 // -> "hello earth!"
 ```
 
@@ -336,7 +336,7 @@ Here we setup a basic Fage app, and then create a basic Express HTTP interface.
 Starting with the Fage app methods:
 
 ```js
-const fage = require('fage')
+const Fage = require('fage')
 const {chkPermissions, validateInputs, formatData, dbSave, dbGet, log} = require('./myCode')
 
 // Fage method block
@@ -357,7 +357,7 @@ const getRandomPosts = {
 }
 
 // Bundle your Fage
-const app = fage([getPosts, createPost])
+const app = Fage([getPosts, createPost])
 module.exports = app
 ```
 
