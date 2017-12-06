@@ -17,13 +17,13 @@ const app = Fage([myFageLogin, ...])
 express.post('/login', myMiddleware, (req, res) => app.userLogin(req.body, req.state.CustomAppData))
 ```
 
-Using Fage (or jump to the [example](#example)):
+Using Fage (jump to the [example](#example)):
 
 - **Create logic blocks**: Define objects with a unique `path` name and an array of "[middleware](#middleware)" functions `fns`. These objects are your "[method blocks](#method-blocks)".
 
 - **Package into functions**: These method blocks are bundled by `Fage(arrayOfMethodBlocks)` into a flat object of _runnable functions_, keyed by each method blocks's `path` value. Each function is a reducer that runs the middleware `fns`, passing each fn: a) the `ctx` [context object](#ctx-context-object) and b) the `output` of each call to the next function in the chain, returning a Promise that resolves as the final middleware output.
 
-- **Run functions**: Once bundled, functions are called with two params: a) untrusted data from user `input`, and b) trusted app/environment data `meta`. These become available on the [`ctx` context](#ctx-context-object) passed to Fage block fns.
+- **Run functions**: Once bundled, functions are called with two params: a) untrusted data from user `input`, and b) trusted app/environment data `meta`. These become available on the [`ctx` context](#ctx-context-object) passed to Fage [method block](#method-blocks) fns.
 
 Fage functions can be invoked by independent _interfaces_ that map their interface calls, inputs and application data to named Fage functions. This decouples the interface from the underlying app logic, which itself can be composed as middleware. Your app becomes a collection of lightweight objects that can be plugged into any interface (including HTTP, sockets, RPC, CLI etc).
 
@@ -224,7 +224,7 @@ Middleware have full access to the `ctx` context object, detailed below.
 
 
 ## `ctx` context object
-The context `ctx` object is passed as the first parameter to every middleware.
+The context `ctx` object is passed as the first parameter to every [middleware](#middleware).
 
 The two data channels are available on `ctx` as:
 
@@ -234,7 +234,7 @@ The two data channels are available on `ctx` as:
 In addtion, underlying _method block_ values are also provided:
 
 - `path`: **String** - The unique `path` value for the underlying method block
-- `ref`: **Object** - Any `ref` data set in the underlying method block
+- `ref`: **Object** - Any `ref` data set in the underlying [method block](#method-blocks)
 
 The context object is _immutable_ except for its `state` parameter, which middleware may choose to use to store stateful info if returning its output is insufficient.
 
@@ -247,7 +247,7 @@ The primary API for Fage is the single factory call `Fage()`.
 
 ### Fage(methodBlocksArray)
 
-Packages the methodBlocks in `methodBlocksArray` into a shallow object of runnable functions keyed by each method block's `path` value.
+Packages the methodBlocks in `methodBlocksArray` into a shallow object of runnable functions keyed by each [method block's](#method-blocks) `path` value.
 
 ```js
 const Fage = require('fage')
@@ -263,7 +263,7 @@ await app.hello('world')
 
 Parameters:
 
-- `methodBlocksArray`: **Array** - An array of Fage method blocks
+- `methodBlocksArray`: **Array** - An array of Fage [method blocks](#method-blocks)
 
 Returns:
 - **Fage Application Object**: Flat object of runnable functions keyed by each method block's `path` value.
@@ -276,7 +276,7 @@ There are also a handful of helper methods that may be of use during development
 
 ### Fage.run(methodBlock[, input, meta])
 
-Runs a specific method block object.
+Runs a specific [method block](#method-blocks) object.
 
 > Note: This is essentially what the factory `Fage()` method uses to bind a method block to run as a Function.
 
@@ -303,7 +303,7 @@ Returns:
 
 ## Interfaces
 
-Fage simply bundles flat objects of runnable method blocks, which themselves are thin wrappers keyed by their `path` values and containing middleware `fns`. Fage methods receive parameters `(input, meta)`, but Fage itself does not know (or care) where these come from or how they are defined.
+Fage simply bundles flat objects of runnable [method blocks](#method-blocks), which themselves are thin wrappers keyed by their `path` values and containing [middleware](#middleware) `fns`. Fage methods receive parameters `(input, meta)`, but Fage itself does not know (or care) where these come from or how they are defined.
 
 That is the job of an interface.
 
