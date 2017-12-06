@@ -21,9 +21,9 @@ Using Fage (or jump to the [example](#example)):
 
 - **Create logic blocks**: Define objects with a unique `path` name and an array of "[middleware](#middleware)" functions `fns`. These objects are your "[method blocks](#method-blocks)".
 
-- **Package into functions**: These method blocks are bundled by `Fage(arrayOfMethodBlocks)` into a flat object of _runnable functions_, keyed by each method blocks's `path` value.
+- **Package into functions**: These method blocks are bundled by `Fage(arrayOfMethodBlocks)` into a flat object of _runnable functions_, keyed by each method blocks's `path` value. Each function is a reducer that runs the middleware `fns`, passing each fn: a) the `ctx` [context object](#ctx-context-object) and b) the `output` of each call to the next function in the chain, returning a Promise that resolves as the final middleware output.
 
-- **Run functions**: Each function is a reducer that runs the middleware `fns`, passing each fn: a) the `ctx` [context object](#ctx-context-object) and b) the `output` of each call to the next function in the chain, returning a Promise that resolves as the final middleware output.
+- **Run functions**: Once bundled, functions are called with two params: a) untrusted data from user `input`, and b) trusted app/environment data `meta`. These become available on the [`ctx` context](#ctx-context-object) passed to Fage block fns.
 
 Fage functions can be invoked by independent _interfaces_ that map their interface calls, inputs and application data to named Fage functions. This decouples the interface from the underlying app logic, which itself can be composed as middleware. Your app becomes a collection of lightweight objects that can be plugged into any interface (including HTTP, sockets, RPC, CLI etc).
 
