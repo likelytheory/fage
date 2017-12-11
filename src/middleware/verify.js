@@ -1,4 +1,5 @@
 
+const Promise = require('bluebird')
 const error = require('../error')
 
 // Export `verify` middleware module
