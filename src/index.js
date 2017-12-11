@@ -2,7 +2,6 @@
 const DB = require('./db')
 const Scopes = require('./scopes')
 const error = require('./error')
-const events = require('./events')
 const generics = require('./generics')
 const mw = require('./methods')
 const {run, compose} = require('./core')
@@ -49,7 +48,6 @@ module.exports.run = run
 
 module.exports.db = DB
 module.exports.error = error
-module.exports.events = events
 module.exports.generics = generics
 module.exports.mw = mw
 module.exports.scopes = Scopes
