@@ -86,7 +86,7 @@ test('block.onError handler runs on thrown error if set on method block', t => {
         err.message === 'boom',
         'Caught middleware thrown output Error'
       )
-    });
+    })
 })
 
 test('block.onError handler has thrown errors suppressed', t => {
