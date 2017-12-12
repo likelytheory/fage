@@ -141,3 +141,24 @@ test('project(model [, useScopes, input])', async t => {
   const zo = await fn({meta: {claims: ['moo', 'root']}, input: rawData})
   t.deepEqual(Object.keys(zo), ['id', 'ownerId', 'secret', 'says'])
 })
+
+/*
+  mergeFromMeta(keymap)
+*/
+
+test('mergeFromMeta(keymap)', async t => {
+  const myData = {yo: '🃏'}
+  const mw = Data.mergeFromMeta({derp: 'moomoo'})
+
+  // Check that passthrough (no keymap) is exact same object
+  const pass = await Data.mergeFromMeta({})({input: myData})
+  t.is(pass, myData)
+
+  // Check merge meta field onto data
+  const rp = await mw({input: myData, meta: {moomoo: '🐮'}})
+  t.is(rp.derp, '🐮')
+
+  // Ensure meta overwrites existing field 'derp'
+  const cp = await mw({input: {derp: 'NO!'}, meta: {moomoo: '🍔'}})
+  t.is(cp.derp, '🍔')
+})

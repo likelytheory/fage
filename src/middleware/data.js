@@ -153,7 +153,7 @@ Data.project = (model, useScopes, input) => {
 
 /**
   mergeFromMeta(keymap)
-  Merges data channel with keys from `meta` channel.
+  Merges `input` channel data with values from `meta` channel keys
   Enables saving meta (application derived) data down to user supplied data
 
   @param {Object} keymap Map `{toKey: 'fromMetaKey'}`
@@ -161,16 +161,18 @@ Data.project = (model, useScopes, input) => {
   @return {Function} Middleware that merges meta keys (if any) and continues
 */
 
-Data.mergeFromMeta = keymap => (ctx, out) => {
+Data.mergeFromMeta = (keymap = {}) => ctx => {
   // If no keymap is provided, no merge required, passthrough `ctx.input`
-  if (!keymap) return ctx.input
+  if (!keymap || !Object.keys(keymap).length) return ctx.input
 
   let ret = Object.assign({}, ctx.input)
   for (let key in keymap) {
-    // Overwrite input data with meta data, or use input for default
-    ret[key] = ctx.meta[keymap[key]] || ctx.input[key]
+    // If the `meta` channel has a key of that value, OVERWRITE the result
+    const metaVal = ctx.meta[keymap[key]]
+    if (typeof metaVal !== 'undefined') ret[key] = metaVal
   }
-  return ret
+
+  return Promise.resolve(ret)
 }
 
 /*
