@@ -19,11 +19,14 @@ express.post('/login', myMiddleware, (req, res) => app.userLogin(req.body, req.s
 
 Using Fage (jump to the [example](#example)):
 
-- **Create logic blocks**: Define objects with a unique `path` name and an array of "[middleware](#middleware)" functions `fns`. These objects are your "[method blocks](#method-blocks)".
+- **Create logic blocks**:  
+Define objects with a unique `path` name and an array of "[middleware](#middleware)" functions `fns`. These objects are your "[method blocks](#method-blocks)".
 
-- **Package into functions**: These method blocks are bundled by `Fage(arrayOfMethodBlocks)` into a flat object of _runnable functions_, keyed by each method blocks's `path` value. Each function is a reducer that runs the middleware `fns`, passing each fn: a) the `ctx` [context object](#ctx-context-object) and b) the `output` of each call to the next function in the chain, returning a Promise that resolves as the final middleware output.
+- **Package into functions**:  
+These method blocks are bundled by `Fage(arrayOfMethodBlocks)` into a flat object of _runnable functions_, keyed by each method blocks's `path` value. Each function is a reducer that runs the middleware `fns`, passing each fn: a) the `ctx` [context object](#ctx-context-object) and b) the `output` of each call to the next function in the chain, returning a Promise that resolves as the final middleware output.
 
-- **Run functions**: Once bundled, functions are called with two params: a) untrusted data from user `input`, and b) trusted app/environment data `meta`. These become available on the [`ctx` context](#ctx-context-object) passed to Fage [method block](#method-blocks) fns.
+- **Run functions**:  
+Once bundled, functions are called with two params: a) untrusted data from user `input`, and b) trusted app/environment data `meta`. These become available on the [`ctx` context](#ctx-context-object) passed to Fage [method block](#method-blocks) fns.
 
 Fage functions can be invoked by independent _interfaces_ that map their interface calls, inputs and application data to named Fage functions. This decouples the interface from the underlying app logic, which itself can be composed as middleware. Your app becomes a collection of lightweight objects that can be plugged into any interface (including HTTP, sockets, RPC, CLI etc).
 
@@ -83,7 +86,7 @@ modules.export = {
 }
 ```
 
-#### Bundle into an app
+#### Package into functions
 Fage bundles this app logic into a flat object of _runnable functions_ keyed by the `path`:
 
 ```js
@@ -92,7 +95,12 @@ const nyanExclaim = require('./exampleAbove')
 
 const app = Fage([nyanExclaim])
 // -> {nyanExclaim: Function}
+```
 
+#### Run functions
+Functions can then be run by passing `fn(input, meta)`, where `input` is the untrusted, raw user-input and `meta` is an object comprising any system defined information (such as authentication details, environment data, etc).
+
+```js
 await app.nyanExclaim('meow meow', {loggedIn: true})
 // OR: await Fage.run(nyanExclaim, 'meow meow', {loggedIn: true})
 //                    ,---/V\     ________________
@@ -101,7 +109,8 @@ await app.nyanExclaim('meow meow', {loggedIn: true})
 // -> "meow meow!@#!!"
 ```
 
-Failing to provide a `loggedIn` value on the `meta` parameter will trigger an Auth error in our method block:
+In the example above, failing to provide a `loggedIn` value on the `meta` parameter will trigger an Auth error in our method block:
+
 ```js
 await app.nyanExclaim('meow meow')
 // -> Error: Not Logged In
