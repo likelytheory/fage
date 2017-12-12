@@ -42,6 +42,9 @@ test('resultExists()', async t => {
   await t.throws(fn(CTX, null))
   await t.throws(fn(CTX))
   await t.throws(fn(CTX, []))
+
+  const out = await fn(CTX, {id: 1})
+  t.is(out.id, 1)
 })
 
 test('resultMatchMeta(resultField, metaField)', async t => {
