@@ -1,18 +1,17 @@
 
 const memoryDBwrapper = require('./db')
-const {compose} = require('./core')
-const error = require('./error')
-const mw = require('./methods')
+const {compose, error} = require('./index')
+const {Data, Scopes, Verify} = require('./middleware/index')
 
 /*
-  Generics helpers
+  setWhereOnDbQuery
+  `qry` is the query object sent to the DB, and contains all the options and
+  data used to modify or read from the database. This fn enables setting a
+  `where` condition on that `qry` query object BASED ON a "resourceId" field
+  on the `meta` channel of the definition block `ctx`
+  MUTATES qry!
 */
 
-// `qry` is the query object sent to the DB, and contains all the options and
-// data used to modify or read from the database. This fn enables setting a
-// `where` condition on that `qry` query object BASED ON a "resourceId" field
-// on the `meta` channel of the definition block `ctx`
-// MUTATES qry!
 function setWhereOnDbQuery (ctx, qry) {
   if (!ctx.meta.resourceId) {
     throw error.create({
@@ -25,57 +24,69 @@ function setWhereOnDbQuery (ctx, qry) {
   qry.where = Object.assign({}, qry.where, cond)
 }
 
-/**
+/*
   Generic create resource
 */
 
 const create = DB => (table, {
-  mergeFromMeta = null,
-  db = {},
-  formatOpts = {},
-  requireAuth = true
+  auth = true,
+  query = {},
+  merge = null,
+  model = {},
+  format = {},
+  scopes = []
 } = {}) => compose([
-  // Prep data for saving
-  mw.prepareData({
-    checkAuth: requireAuth,
-    formatOpts: Object.assign({once: true, unlock: true}, formatOpts),
-    mergeFromMeta
-  }),
+  auth ? Verify.hasAuth('userId') : null,
+  Scopes.verify(scopes),
+  Data.verifyKeysOk(model),
+
+  Data.mergeFromMeta(merge),
+
+  (ctx, merged) => Data.format(
+    model,
+    Object.assign({once: true, unlock: true}, format),
+    merged),
+  (ctx, formatted) => Data.validate(model, {}, formatted),
+
   // Save to datastore
-  (ctx, toSave) => DB.create(table, db, toSave)
+  (ctx, toSave) => DB.create(table, query, toSave)
 ])
 
-/**
+/*
   Generic Update resource
 */
 
 const update = DB => (table, {
-  qry = {},
+  auth = true,
+  query = {},
   onResourceId = false,
+  model = {},
   projectModel,
-  requireAuth = true
+  scopes = []
 } = {}) => compose([
   // Does user need to be logged in
-  requireAuth ? mw.verifyAuthed : null,
-  mw.verifyScopes,
+  auth ? Verify.hasAuth('userId') : null,
 
-  mw.preventBogusPayloadKeys,
+  // Ensure scopes are valid if any
+  Scopes.verify(scopes),
 
-  // Set a `where` query on the `qry` object if resource Id passed. MUTATES qry.
-  ctx => (onResourceId) && setWhereOnDbQuery(ctx, qry),
+  // Verify that payload shapes match
+  Data.verifyKeysOk(model),
 
-  // Return all fields on update
-  ctx => (qry.returning = '*'),
+  // Set `where` field on the `query` if resource Id passed - MUTATES query
+  ctx => onResourceId && setWhereOnDbQuery(ctx, query),
+  // Postgres specific: Return all fields on update
+  ctx => (query.returning = '*'),
 
   // Prepare the payload
-  mw.format.raw({defaults: false}),
-  mw.validate.out(),
+  Data.format(model, {defaults: false}),
+  (ctx, out) => Data.validate(model, {}, out),
 
-  (ctx, toSave) => DB.update(table, qry, toSave),
+  (ctx, toSave) => DB.update(table, query, toSave),
 
   // Project only the fields we have permission for
   // Can override the ctx model with a projection model `projectModel`
-  (ctx, out) => mw.projectOnScopes({model: projectModel || ctx.model}, out)
+  (ctx, out) => Data.project(projectModel || model, scopes, out)
 ])
 
 /**
@@ -83,18 +94,20 @@ const update = DB => (table, {
 */
 
 const list = DB => (table, {
-  qry = {},
-  userKey = 'id',
-  onResourceId = false
+  query = {},
+  model = {},
+  onResourceId = false,
+  scopes = []
 } = {}) => compose([
   // First ensure user has appropriate global scope if any on the definition
-  mw.verifyScopes,
+  Scopes.verify(scopes),
 
-  // Set a `where` query on the `qry` object if resource Id passed. MUTATES qry.
-  ctx => onResourceId && setWhereOnDbQuery(ctx, qry),
+  // Set `where` field on the `query` if resource Id passed - MUTATES query
+  ctx => onResourceId && setWhereOnDbQuery(ctx, query),
 
-  ctx => DB.list(table, qry),
-  mw.projectOnScopes
+  ctx => DB.list(table, query),
+
+  (ctx, out) => Data.project(model, scopes, out)
 ])
 
 /**
@@ -102,19 +115,22 @@ const list = DB => (table, {
 */
 
 const read = DB => (table, {
-  qry = {},
+  query = {},
   userKey = 'id',
-  onResourceId = false
+  model = {},
+  onResourceId = false,
+  scopes = []
 } = {}) => compose([
   // First ensure user has appropriate global scope if any on the definition
-  mw.verifyScopes,
+  Scopes.verify(scopes),
 
-  // Set a `where` query on the `qry` object if resource Id passed. MUTATES qry.
-  ctx => onResourceId && setWhereOnDbQuery(ctx, qry),
+  // Set `where` field on the `query` if resource Id passed - MUTATES query
+  ctx => onResourceId && setWhereOnDbQuery(ctx, query),
 
-  ctx => DB.read(table, qry),
-  mw.verifyFound,
-  mw.projectOnScopes
+  ctx => DB.read(table, query),
+
+  Verify.resultExists(),
+  (ctx, out) => Data.project(model, scopes, out)
 ])
 
 /**
@@ -122,15 +138,17 @@ const read = DB => (table, {
 */
 
 const remove = DB => (table, {
-  qry = {},
-  onResourceId = false
+  query = {},
+  onResourceId = false,
+  scopes = []
 } = {}) => compose([
   // First ensure user has appropriate global scope if any on the definition
-  mw.verifyScopes,
+  Scopes.verify(scopes),
 
-  ctx => onResourceId && setWhereOnDbQuery(ctx, qry),
+  // Set `where` field on the `query` if resource Id passed - MUTATES query
+  ctx => onResourceId && setWhereOnDbQuery(ctx, query),
 
-  ctx => DB.remove(table, qry)
+  ctx => DB.remove(table, query)
 ])
 
 /*
@@ -143,8 +161,11 @@ const remove = DB => (table, {
   @returns {Object} A set of generic CRUD fn middlewares
 */
 
-const generics = (db = memoryDBwrapper) => {
-  if (!db) throw new Error('Must provide generics with DB object map')
+module.exports = (db = memoryDBwrapper) => {
+  // Duck-type check the provided 'db'
+  if (!db || !db.create || !db.remove || !db.read || !db.list) {
+    throw new Error('Invalid DB object map provided to generics(db)')
+  }
 
   return {
     create: create(db),
@@ -154,5 +175,3 @@ const generics = (db = memoryDBwrapper) => {
     remove: remove(db)
   }
 }
-
-module.exports = generics
