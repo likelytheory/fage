@@ -20,7 +20,7 @@ const NO_CONTEXT_OBJ = new Error('No context object present')
   // passing model AND input returns result as a Promise
   // or:
   fns: [data.verifyKeysOk(myModel)]
-  // passing ONLY model return middleware that uses `ctx.raw` as input
+  // passing ONLY model return middleware that uses `ctx.input` as input
   ```
 
   @param {Object} model The Skematic model to validate against
@@ -47,13 +47,13 @@ Data.verifyKeysOk = (model, input) => {
   // Otherwise return middleware
   return ctx => {
     if (!ctx || !ctx.meta) throw NO_CONTEXT_OBJ
-    return Promise.resolve(chk(ctx.raw))
+    return Promise.resolve(chk(ctx.input))
   }
 }
 
 /*
   format(model, [input])
-  Formats input (or ctx.raw) against Skematic `model`
+  Formats input (or ctx.input) against Skematic `model`
 
   @param {Object} model The Skematic model to format against
   @param {Object} [opts] Skematic format options
@@ -69,13 +69,13 @@ Data.format = (model, opts, input) => {
 
   return ctx => {
     if (!ctx || !ctx.meta) throw NO_CONTEXT_OBJ
-    return fmt(ctx.raw)
+    return fmt(ctx.input)
   }
 }
 
 /*
   validate(model, [input])
-  Validates input (or ctx.raw) against Skematic `model`
+  Validates input (or ctx.input) against Skematic `model`
 
   @param {Object} model The Skematic model to validate against
   @param {Object} [opts] Skematic validate options
@@ -99,7 +99,7 @@ Data.validate = (model, opts, input) => {
 
   return ctx => {
     if (!ctx || !ctx.meta) throw NO_CONTEXT_OBJ
-    return vld(ctx.raw)
+    return vld(ctx.input)
   }
 }
 
@@ -108,7 +108,7 @@ Data.validate = (model, opts, input) => {
   Skematic method to format field visibility based on the `model` and any
   provided scopes on `useScopes`. Resolve a Promise if `useScopes` and `input`
   are passed, otherwise returns a middelware fn that formats the data on
-  `ctx.raw` against scopes on `ctx.meta.claims`
+  `ctx.input` against scopes on `ctx.meta.claims`
 
   @param {Object} model The Skematic model to format against
   @param {Object} [useScopes] Optional scopes to use for matching
@@ -147,6 +147,47 @@ Data.project = (model, useScopes, input) => {
   // Otherwise return the middleware
   return ctx => {
     if (!ctx || !ctx.meta) throw NO_CONTEXT_OBJ
-    return run(ctx.raw, ctx.meta.claims)
+    return run(ctx.input, ctx.meta.claims)
   }
+}
+
+/**
+  mergeFromMeta(keymap)
+  Merges data channel with keys from `meta` channel.
+  Enables saving meta (application derived) data down to user supplied data
+
+  @param {Object} keymap Map `{toKey: 'fromMetaKey'}`
+
+  @return {Function} Middleware that merges meta keys (if any) and continues
+*/
+
+Data.mergeFromMeta = keymap => (ctx, out) => {
+  // If no keymap is provided, no merge required, passthrough `ctx.input`
+  if (!keymap) return ctx.input
+
+  let ret = Object.assign({}, ctx.input)
+  for (let key in keymap) {
+    // Overwrite input data with meta data, or use input for default
+    ret[key] = ctx.meta[keymap[key]] || ctx.input[key]
+  }
+  return ret
+}
+
+/*
+  setOwnerId(field)
+
+  @param {String} field Field name to set owner id (default: ownerId)
+
+  @returns {Object} The updated input data with owner ID field set
+*/
+
+Data.setOwnerId = field => (ctx, out) => {
+  // `field` might be unset as a String, in which case default to "ownerId"
+  const useField = field.length ? field : 'ownerId'
+
+  if (ctx.input[useField]) return out
+
+  ctx.state = ctx.state || {}
+  ctx.state.ownerId = ctx.meta.userId
+  return Object.assign({}, out, {ownerId: ctx.meta.userId})
 }

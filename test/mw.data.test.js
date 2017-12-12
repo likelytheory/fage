@@ -23,13 +23,13 @@ test('format(model [, opts, input]', async t => {
 
   // Returns formatted data
   const data = {msg: 'derp', secret: '😱'}
-  const raw = await mw(Object.assign({}, CTX, {raw: data}))
+  const raw = await mw(Object.assign({}, CTX, {input: data}))
   t.deepEqual(Object.keys(raw).sort(), ['created', 'msg'].sort())
 
   // Check that options are correctly passed to Skematic
   const opts = {unlock: true, unscope: true}
   const mwo = await Data.format(GModel, opts)
-  const out = await mwo(Object.assign({}, CTX, {raw: data}))
+  const out = await mwo(Object.assign({}, CTX, {input: data}))
   t.is(out.secret, '😱')
 
   // Ensure direct invocation works
@@ -48,9 +48,9 @@ test('validate(model [, opts, input])', async t => {
   t.throws(() => mw()) // Requires context ctx
 
   // Middlware should throw on bad data
-  await t.throws(mw(Object.assign({}, CTX, {raw: {id: '!'}})))
+  await t.throws(mw(Object.assign({}, CTX, {input: {id: '!'}})))
   // And return the unmodified data if validated
-  const out = await mw(Object.assign({}, CTX, {raw: {msg: '!'}}))
+  const out = await mw(Object.assign({}, CTX, {input: {msg: '!'}}))
   t.deepEqual(out, {msg: '!'})
 
   // Check direct invocation
@@ -73,7 +73,7 @@ test('verifyKeysOk(model [, input])', async t => {
 
   // Verify passes if no bogus keys are present
   const data = {created: '1', id: '1'}
-  const out = await mw(Object.assign({}, CTX, {raw: data}))
+  const out = await mw(Object.assign({}, CTX, {input: data}))
   t.deepEqual(out, data)
 
   // Check direct invocation of good keys
@@ -134,10 +134,10 @@ test('project(model [, useScopes, input])', async t => {
   t.throws(() => fn())
 
   // Should use ctx.meta.claims for scope check
-  const xo = await fn({meta: {claims: 'none'}, raw: rawData})
+  const xo = await fn({meta: {claims: 'none'}, input: rawData})
   t.deepEqual(xo, {id: 'abc', ownerId: 'bravo'})
-  const yo = await fn({meta: {claims: 'moo'}, raw: rawData})
+  const yo = await fn({meta: {claims: 'moo'}, input: rawData})
   t.deepEqual(Object.keys(yo), ['id', 'ownerId', 'says'])
-  const zo = await fn({meta: {claims: ['moo', 'root']}, raw: rawData})
+  const zo = await fn({meta: {claims: ['moo', 'root']}, input: rawData})
   t.deepEqual(Object.keys(zo), ['id', 'ownerId', 'secret', 'says'])
 })

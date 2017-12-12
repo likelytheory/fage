@@ -233,6 +233,7 @@ Middleware have full access to the `ctx` context object, detailed below.
 
 
 ## `ctx` context object
+
 The context `ctx` object is passed as the first parameter to every [middleware](#middleware).
 
 The two data channels are available on `ctx` as:
