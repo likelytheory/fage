@@ -1,3 +1,26 @@
+2.0.0 - 12 December 2017
+===
+
+**Breaking changes**
+
+Added:
+- Typescript type definitions
+- .editorconfig file
+
+Removed:
+- Events emitter in Fage
+- Old `Scopes` module and methods
+
+Changed:
+- `onError` hook errors are suppressed
+- RateLimit error code updated to 429
+- Error constructor returns an `Error` type
+- Updated npm dependencies
+- Complete refactor and move of all middleware
+- Using `ctx.input` for user input (not `ctx.raw`)
+
+
+
 1.1.0 - 26 September 2017
 ===
 
