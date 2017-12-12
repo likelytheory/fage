@@ -4,7 +4,7 @@
   "description": "Declarative middleware runner",
   "main": "index.js",
   "scripts": {
-    "test": "ava"
+    "test": "ava -v"
   },
   "author": "cayuu (https://github.com/cayuu)",
   "license": "UNLICENSED",
