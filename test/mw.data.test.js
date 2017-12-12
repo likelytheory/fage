@@ -132,4 +132,12 @@ test('project(model [, useScopes, input])', async t => {
   const fn = Data.project(model)
   t.true(typeof fn === 'function')
   t.throws(() => fn())
+
+  // Should use ctx.meta.claims for scope check
+  const xo = await fn({meta: {claims: 'none'}, raw: rawData})
+  t.deepEqual(xo, {id: 'abc', ownerId: 'bravo'})
+  const yo = await fn({meta: {claims: 'moo'}, raw: rawData})
+  t.deepEqual(Object.keys(yo), ['id', 'ownerId', 'says'])
+  const zo = await fn({meta: {claims: ['moo', 'root']}, raw: rawData})
+  t.deepEqual(Object.keys(zo), ['id', 'ownerId', 'secret', 'says'])
 })

@@ -105,10 +105,10 @@ Data.validate = (model, opts, input) => {
 
 /**
   projectOnScopes(model, [useScopes, input])
-  Formats a record's visible fields (ie. those that are returned) based on the
-  `ctx.model` provided on `ctx`, using the `ctx.state.activeScopes` for
-  handling formatting. Requires that some method up the chain sets the
-  'activeScopes' to use.
+  Skematic method to format field visibility based on the `model` and any
+  provided scopes on `useScopes`. Resolve a Promise if `useScopes` and `input`
+  are passed, otherwise returns a middelware fn that formats the data on
+  `ctx.raw` against scopes on `ctx.meta.claims`
 
   @param {Object} model The Skematic model to format against
   @param {Object} [useScopes] Optional scopes to use for matching
@@ -147,6 +147,6 @@ Data.project = (model, useScopes, input) => {
   // Otherwise return the middleware
   return ctx => {
     if (!ctx || !ctx.meta) throw NO_CONTEXT_OBJ
-    return run(ctx.raw, ctx.state.activeScopes)
+    return run(ctx.raw, ctx.meta.claims)
   }
 }
