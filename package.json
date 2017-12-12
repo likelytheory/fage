@@ -2,7 +2,7 @@
   "name": "fage",
   "version": "0.1.0",
   "description": "Declarative middleware runner",
-  "main": "src/index.js",
+  "main": "index.js",
   "scripts": {
     "test": "ava"
   },
