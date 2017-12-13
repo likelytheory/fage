@@ -174,22 +174,3 @@ Data.mergeFromMeta = (keymap = {}) => ctx => {
 
   return Promise.resolve(ret)
 }
-
-/*
-  setOwnerId(field)
-
-  @param {String} field Field name to set owner id (default: ownerId)
-
-  @returns {Object} The updated input data with owner ID field set
-*/
-
-Data.setOwnerId = field => (ctx, out) => {
-  // `field` might be unset as a String, in which case default to "ownerId"
-  const useField = field.length ? field : 'ownerId'
-
-  if (ctx.input[useField]) return out
-
-  ctx.state = ctx.state || {}
-  ctx.state.ownerId = ctx.meta.userId
-  return Object.assign({}, out, {ownerId: ctx.meta.userId})
-}
