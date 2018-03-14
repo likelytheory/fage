@@ -21,7 +21,9 @@ Fage.run({
 const mb: Fage.MethodBlock = {
   path: 'go',
   fns: [
-    () => 'hello'
+    ctx => {
+      return ctx.input;
+    }
   ]
 };
 
