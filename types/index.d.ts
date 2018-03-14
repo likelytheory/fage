@@ -118,7 +118,15 @@ declare namespace Fage {
 
   /**
    * A Fage MethodBlock defines the functions `fns` to run through the Promise
-   * reducer and a `path` name to uniquely identify the block
+   * reducer and a `path` name to uniquely identify the block. Optionally
+   * define a `ref` object to store reference data on the Fage Context object.
+   * Also optionally define an `onError` handler to pass-through process
+   * any thrown Errors
+   *
+   * @prop {String} path Unique identifier for the MethodBlock
+   * @prop {Fage.Middleware[]} fns Array of Fage.Middleware functions
+   * @prop {any} [ref] Any reference data to be made available on Fage Context
+   * @prop {Function} [onError] Optional error handler
    */
   interface MethodBlock {
     /**
