@@ -23,7 +23,7 @@ Using Fage (jump to the [example](#example)):
 Define objects with a unique `path` name and an array of "[middleware](#middleware)" functions `fns`. These objects are your "[method blocks](#method-blocks)".
 
 - **Package into functions**:  
-These method blocks are bundled by `Fage(arrayOfMethodBlocks)` into a flat object of _runnable functions_, keyed by each method blocks's `path` value. Each function is a reducer that runs the middleware `fns`, passing each fn: a) the `ctx` [context object](#ctx-context-object) and b) the `output` of each call to the next function in the chain, returning a Promise that resolves as the final middleware output.
+These method blocks are bundled by `Fage(arrayOfMethodBlocks)` into a flat object of _runnable functions_, keyed by each method block's `path` value. Each function is a reducer that runs the middleware `fns`, passing each fn: a) the `ctx` [context object](#ctx-context-object) and b) the `output` of each call to the next function in the chain, returning a Promise that resolves as the final middleware output.
 
 - **Run functions**:  
 Once bundled, functions are called with two params: a) untrusted data from user `input`, and b) trusted app/environment data `meta`. These become available on the [`ctx` context](#ctx-context-object) passed to Fage [method block](#method-blocks) fns.
@@ -204,7 +204,7 @@ Middleware functions can be either **synchronous** by immediately returning a va
 
 Fage waits on the output of each middleware before invoking the next in the chain.
 
-**Errors should throw** and should handled at the _interface_ level - Fage methods should throw a descriptive Error object and leave the interface to determine how to handle this.
+**Errors should throw** and should be handled at the _interface_ level - Fage methods should throw a descriptive Error object and leave the interface to determine how to handle this.
 
 ```js
 const checkMw = (ctx) => {
