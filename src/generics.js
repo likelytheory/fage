@@ -80,13 +80,14 @@ const update = DB => (table, {
 
   // Prepare the payload
   Data.format(model, {defaults: false}),
-  (ctx, out) => Data.validate(model, {}, out),
+  (ctx, out) => Data.validate(model, {sparse: true}, out),
 
-  (ctx, toSave) => DB.update(table, query, toSave),
+  // This updates MANY matching the query, so only return the first record
+  (ctx, toSave) => DB.update(table, query, toSave).then(res => res[0]),
 
   // Project only the fields we have permission for
   // Can override the ctx model with a projection model `projectModel`
-  (ctx, out) => Data.project(projectModel || model, scopes, out)
+  (ctx, out) => out ? Data.project(projectModel || model, scopes, out) : out
 ])
 
 /**
