@@ -84,21 +84,21 @@ declare namespace Fage {
     create(options: ErrorOptionsAll): Error;
 
     /** 400 Bad Request */
-    badrequest(opts: ErrorOptions): Error;
+    badrequest(opts: ErrorOptions | string): Error;
     /** 401 Unauthorized */
-    unauthorized(opts: ErrorOptions): Error;
+    unauthorized(opts: ErrorOptions | string): Error;
     /** 403 Forbidden */
-    forbidden(opts: ErrorOptions): Error;
+    forbidden(opts: ErrorOptions | string): Error;
     /** 404 Not Found */
-    notfound(opts: ErrorOptions): Error;
+    notfound(opts: ErrorOptions | string): Error;
     /** 409 Conflict */
-    conflict(opts: ErrorOptions): Error;
+    conflict(opts: ErrorOptions | string): Error;
     /** 421 Rate Limit */
-    ratelimit(opts: ErrorOptions): Error;
+    ratelimit(opts: ErrorOptions | string): Error;
     /** 500 Server Error */
-    fatal(opts: ErrorOptions): Error;
+    fatal(opts: ErrorOptions | string): Error;
     /** 503 Server Unavailable */
-    unavailable(opts: ErrorOptions): Error;
+    unavailable(opts: ErrorOptions | string): Error;
   }
 
   /**
