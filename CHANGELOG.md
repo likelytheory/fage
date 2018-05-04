@@ -1,3 +1,20 @@
+2.1.0 - 4 May 2018
+===
+
+Changed:
+- Verify middleware renamed `isAuthedOn` -> `hasAuth`
+
+Removed:
+- `setOwnerId` middleware
+
+Internal:
+- Update comment style to JSDoc
+- Added Type definitions for Context
+- Improved documentation for Typing
+- Updated Readme docs
+
+
+
 2.0.0 - 12 December 2017
 ===
 
