@@ -111,7 +111,9 @@ const projection = (data, keys) => {
 // Faux DB interface to Map store
 const DB = {
   findOne (table, opts = {}) {
-    if (!opts.where) return Promise.reject('DB missing `opts.where` definition')
+    if (!opts.where) {
+      return Promise.reject(new Error('DB missing `opts.where` definition'))
+    }
 
     return DB.findMany(table, opts)
       .then(results => results[0])
