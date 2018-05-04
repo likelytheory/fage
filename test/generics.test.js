@@ -53,7 +53,7 @@ test('Generics functional run through', async t => {
   const updater = generic.update('punks', {auth: false, query: where, model})
   const updateOut = await updater({input: {name: 'Steve Stephens'}, meta: {}})
   // Currently DB update returns an array of updated elements. Choose first.
-  t.is(updateOut[0].name, 'Steve Stephens')
+  t.is(updateOut.name, 'Steve Stephens')
 
   // 4. List it
   const lister = generic.list('punks', {query: where})
