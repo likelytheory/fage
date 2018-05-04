@@ -30,7 +30,7 @@ verify.hasMeta = (field, errType = 'forbidden') => function (ctx, output) {
 }
 
 /*
-  isAuthedOn(field)
+  hasAuth(field)
   Identical to `verify.hasMeta(field)` but returns 401 Unauthorized rather
   than the 403 Forbidden
 
