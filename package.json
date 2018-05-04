@@ -1,8 +1,9 @@
 {
-  "name": "fage",
   "version": "2.0.0",
+  "name": "@likelytheory/fage",
   "description": "Declarative middleware runner",
   "main": "index.js",
+  "private": true,
   "scripts": {
     "test": "ava -v"
   },
