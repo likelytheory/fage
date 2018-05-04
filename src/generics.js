@@ -4,13 +4,13 @@ const {compose, error} = require('./index')
 const {Data, Scopes, Verify} = require('./middleware/index')
 
 /*
-  setWhereOnDbQuery
-  `qry` is the query object sent to the DB, and contains all the options and
-  data used to modify or read from the database. This fn enables setting a
-  `where` condition on that `qry` query object BASED ON a "resourceId" field
-  on the `meta` channel of the definition block `ctx`
-  MUTATES qry!
-*/
+ * setWhereOnDbQuery
+ * `qry` is the query object sent to the DB, and contains all the options and
+ * data used to modify or read from the database. This fn enables setting a
+ * `where` condition on that `qry` query object BASED ON a "resourceId" field
+ * on the `meta` channel of the definition block `ctx`
+ * MUTATES qry!
+ */
 
 function setWhereOnDbQuery (ctx, qry) {
   if (!ctx.meta.resourceId) {
@@ -25,8 +25,8 @@ function setWhereOnDbQuery (ctx, qry) {
 }
 
 /*
-  Generic create resource
-*/
+ * Generic create resource
+ */
 
 const create = DB => (table, {
   auth = true,
@@ -53,8 +53,8 @@ const create = DB => (table, {
 ])
 
 /*
-  Generic Update resource
-*/
+ * Generic Update resource
+ */
 
 const update = DB => (table, {
   auth = true,
@@ -91,8 +91,8 @@ const update = DB => (table, {
 ])
 
 /**
-  Generic List/Find resource
-*/
+ * Generic List/Find resource
+ */
 
 const list = DB => (table, {
   query = {},
@@ -112,8 +112,8 @@ const list = DB => (table, {
 ])
 
 /**
-  Generic single resource record fetch
-*/
+ * Generic single resource record fetch
+ */
 
 const read = DB => (table, {
   query = {},
@@ -135,8 +135,8 @@ const read = DB => (table, {
 ])
 
 /**
-  Generic Remove resource
-*/
+ * Generic Remove resource
+ */
 
 const remove = DB => (table, {
   query = {},
@@ -152,15 +152,15 @@ const remove = DB => (table, {
   ctx => DB.remove(table, query)
 ])
 
-/*
-  The Generics export is initialised with an engine compatible `DB`
-  The DB is a set of named functions (create, update, list, etc.) that wrap
-  an underlying database driver.
-
-  @param {Object} db An engine compatible set of named db commands
-
-  @returns {Object} A set of generic CRUD fn middlewares
-*/
+/**
+ * The Generics export is initialised with an engine compatible `DB`
+ * The DB is a set of named functions (create, update, list, etc.) that wrap
+ * an underlying database driver.
+ *
+ * @param {Object} db An engine compatible set of named db commands
+ *
+ * @returns {Object} A set of generic CRUD fn middlewares
+ */
 
 module.exports = (db = memoryDBwrapper) => {
   // Duck-type check the provided 'db'

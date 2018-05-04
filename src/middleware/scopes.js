@@ -8,15 +8,15 @@ let Scopes = module.exports
 const NO_CONTEXT_OBJ = new Error('No context object present')
 
 /**
-  Simple check that all required `reqScopes` are present in the `claims`.
-
-  @param {[String]|String} reqScopes The required scopes
-  @param {[String]|String} claims The user provided claims
-
-  @function
-  @private
-  @returns {Boolean} Check passes or fails
-*/
+ * Simple check that all required `reqScopes` are present in the `claims`.
+ *
+ * @param {[String]|String} reqScopes The required scopes
+ * @param {[String]|String} claims The user provided claims
+ *
+ * @function
+ * @private
+ * @returns {Boolean} Check passes or fails
+ */
 
 const hasScopes = (reqScopes, claims) => {
   // If there are no requirements, always return true
@@ -37,14 +37,14 @@ const hasScopes = (reqScopes, claims) => {
 }
 
 /**
-  Verifies that the `claims` (or `ctx.meta.claims`) meet the `reqScopes`
-  or THROWS a 403 Forbidden error
-
-  @param {[String]|String} reqScopes The scopes required to be met
-  @param {[String]|String} [claims] Optional claims to be checked
-
-  @return {Promise|Function} Middleware fn if no claims provided
-*/
+ * Verifies that the `claims` (or `ctx.meta.claims`) meet the `reqScopes`
+ * or THROWS a 403 Forbidden error
+ *
+ * @param {[String]|String} reqScopes The scopes required to be met
+ * @param {[String]|String} [claims] Optional claims to be checked
+ *
+ * @return {Promise|Function} Middleware fn if no claims provided
+ */
 
 Scopes.verify = (reqScopes, claims) => {
   const msg = 'Insufficient permissions to access this resource'
@@ -65,14 +65,14 @@ Scopes.verify = (reqScopes, claims) => {
 }
 
 /**
-  Boolean check `claims` (or `ctx.meta.claims`) meet the `reqScopes`
-  and resolves as a Promise
-
-  @param {[String]|String} reqScopes The scopes required to be met
-  @param {[String]|String} [claims] Optional claims to be checked
-
-  @return {Promise|Function} Middleware fn if no claims provided
-*/
+ * Boolean check `claims` (or `ctx.meta.claims`) meet the `reqScopes`
+ * and resolves as a Promise
+ *
+ * @param {[String]|String} reqScopes The scopes required to be met
+ * @param {[String]|String} [claims] Optional claims to be checked
+ *
+ * @return {Promise|Function} Middleware fn if no claims provided
+ */
 
 Scopes.check = (reqScopes, claims) => {
   if (typeof claims !== 'undefined') {

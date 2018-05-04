@@ -9,25 +9,25 @@ let Data = module.exports
 const NO_CONTEXT_OBJ = new Error('No context object present')
 
 /**
-  verifyKeysOk(model, [input])
-  Checks user provided data has no unknown keys - useful as a quick check
-  validation prior to mutating raw user input. Thin wrapper for
-  `Skematic.validate(... {keyCheckOnly: true})`
-
-  ```js
-  // Assuming Fage method block:
-  fns: [(ctx, result) => data.verifyKeysOk(myModel, result)]
-  // passing model AND input returns result as a Promise
-  // or:
-  fns: [data.verifyKeysOk(myModel)]
-  // passing ONLY model return middleware that uses `ctx.input` as input
-  ```
-
-  @param {Object} model The Skematic model to validate against
-  @param {Object} [input] Optional input - returns result as Promise if provided
-
-  @returns {Function} Promise yielding function rejects 400 BadRequest
-*/
+ * verifyKeysOk(model, [input])
+ * Checks user provided data has no unknown keys - useful as a quick check
+ * validation prior to mutating raw user input. Thin wrapper for
+ * `Skematic.validate(... {keyCheckOnly: true})`
+ *
+ * ```js
+ * // Assuming Fage method block:
+ * fns: [(ctx, result) => data.verifyKeysOk(myModel, result)]
+ * // passing model AND input returns result as a Promise
+ * // or:
+ * fns: [data.verifyKeysOk(myModel)]
+ * // passing ONLY model return middleware that uses `ctx.input` as input
+ * ```
+ *
+ * @param {Object} model The Skematic model to validate against
+ * @param {Object} [input] Optional input - returns result as Promise if provided
+ *
+ * @returns {Function} Promise yielding function rejects 400 BadRequest
+ */
 
 Data.verifyKeysOk = (model, input) => {
   // Provide a `chk()` caller for running Skematic key validation
@@ -52,15 +52,15 @@ Data.verifyKeysOk = (model, input) => {
 }
 
 /*
-  format(model, [input])
-  Formats input (or ctx.input) against Skematic `model`
-
-  @param {Object} model The Skematic model to format against
-  @param {Object} [opts] Skematic format options
-  @param {Object} [input] Optional input - returns result as Promise if provided
-
-  @returns {Promise|Function}
-*/
+ * format(model, [input])
+ * Formats input (or ctx.input) against Skematic `model`
+ *
+ * @param {Object} model The Skematic model to format against
+ * @param {Object} [opts] Skematic format options
+ * @param {Object} [input] Optional input - returns result as Promise if provided
+ *
+ * @returns {Promise|Function}
+ */
 
 Data.format = (model, opts, input) => {
   const fmt = dx => Promise.resolve(Skematic.format(model, dx, opts))
@@ -74,15 +74,15 @@ Data.format = (model, opts, input) => {
 }
 
 /*
-  validate(model, [input])
-  Validates input (or ctx.input) against Skematic `model`
-
-  @param {Object} model The Skematic model to validate against
-  @param {Object} [opts] Skematic validate options
-  @param {Object} [input] Optional input - returns result as Promise if provided
-
-  @returns {Promise|Function}
-*/
+ * validate(model, [input])
+ * Validates input (or ctx.input) against Skematic `model`
+ *
+ * @param {Object} model The Skematic model to validate against
+ * @param {Object} [opts] Skematic validate options
+ * @param {Object} [input] Optional input - returns result as Promise if provided
+ *
+ * @returns {Promise|Function}
+ */
 
 Data.validate = (model, opts, input) => {
   const vld = dx => {
@@ -104,18 +104,18 @@ Data.validate = (model, opts, input) => {
 }
 
 /**
-  projectOnScopes(model, [useScopes, input])
-  Skematic method to format field visibility based on the `model` and any
-  provided scopes on `useScopes`. Resolve a Promise if `useScopes` and `input`
-  are passed, otherwise returns a middelware fn that formats the data on
-  `ctx.input` against scopes on `ctx.meta.claims`
-
-  @param {Object} model The Skematic model to format against
-  @param {Object} [useScopes] Optional scopes to use for matching
-  @param {String} [input] Optional input data to project against
-
-  @returns {Promise|Function}
-*/
+ * projectOnScopes(model, [useScopes, input])
+ * Skematic method to format field visibility based on the `model` and any
+ * provided scopes on `useScopes`. Resolve a Promise if `useScopes` and `input`
+ * are passed, otherwise returns a middelware fn that formats the data on
+ * `ctx.input` against scopes on `ctx.meta.claims`
+ *
+ * @param {Object} model The Skematic model to format against
+ * @param {Object} [useScopes] Optional scopes to use for matching
+ * @param {String} [input] Optional input data to project against
+ *
+ * @returns {Promise|Function}
+ */
 
 Data.project = (model, useScopes, input) => {
   function fmt (record, scps = []) {
@@ -152,14 +152,14 @@ Data.project = (model, useScopes, input) => {
 }
 
 /**
-  mergeFromMeta(keymap)
-  Merges `input` channel data with values from `meta` channel keys
-  Enables saving meta (application derived) data down to user supplied data
-
-  @param {Object} keymap Map `{toKey: 'fromMetaKey'}`
-
-  @return {Function} Middleware that merges meta keys (if any) and continues
-*/
+ * mergeFromMeta(keymap)
+ * Merges `input` channel data with values from `meta` channel keys
+ * Enables saving meta (application derived) data down to user supplied data
+ *
+ * @param {Object} keymap Map `{toKey: 'fromMetaKey'}`
+ *
+ * @returns {Function} Middleware that merges meta keys (if any) and continues
+ */
 
 Data.mergeFromMeta = (keymap = {}) => ctx => {
   // If no keymap is provided, no merge required, passthrough `ctx.input`

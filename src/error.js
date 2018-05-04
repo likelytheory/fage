@@ -1,16 +1,16 @@
 
 /**
-  Standardised rich error generator
-
-  @param {Number} status The HTTP status code associated with the error
-  @param {String} type A unique type for this error eg. Validation, NotLoggedIn
-  @param {String} [message] The Error message (default: `type` param)
-  @param {String} [code] An app specific custom error code
-  @param {Mixed} [debug] Debug information for DEVELOPERS
-  @param {Object} [errors] Extra errors object
-
-  @returns {Object} with {message, status, type, debug} fields
-*/
+ * Standardised rich error generator
+ *
+ * @param {Number} status The HTTP status code associated with the error
+ * @param {String} type A unique type for this error eg. Validation, NotLoggedIn
+ * @param {String} [message] The Error message (default: `type` param)
+ * @param {String} [code] An app specific custom error code
+ * @param {Mixed} [debug] Debug information for DEVELOPERS
+ * @param {Object} [errors] Extra errors object
+ *
+ * @returns {Object} with {message, status, type, debug} fields
+ */
 
 function buildError (opts) {
   if (typeof opts === 'string') opts = {message: opts}
