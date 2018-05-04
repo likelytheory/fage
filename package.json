@@ -12,12 +12,12 @@
   "types": "types/index.d.ts",
   "dependencies": {
     "bluebird": "3.5.1",
-    "skematic": "3.1.0"
+    "skematic": "3.5.1"
   },
   "devDependencies": {
-    "ava": "0.24.0",
-    "dtslint": "0.2.0",
-    "standard": "10.0.3",
-    "testdouble": "3.2.6"
+    "ava": "0.25.0",
+    "dtslint": "0.3.0",
+    "standard": "11.0.1",
+    "testdouble": "3.8.0"
   }
 }
