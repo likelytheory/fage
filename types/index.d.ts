@@ -1,3 +1,5 @@
+import * as Skematic from 'skematic';
+
 export = Fage;
 export as namespace Fage;
 
@@ -61,7 +63,7 @@ declare namespace Fage {
   }
 
   /**
-   * Fage Errors extend default Javascript Error objects with custom fields
+   * Fage Errors extend default JavaScript Error objects with custom fields
    * that can provide useful additional information to app environments
    *
    * @prop {Number} status
@@ -152,7 +154,162 @@ declare namespace Fage {
     onError?: (error?: Error) => void;
   }
 
+  /** Fage generics "namespace" object */
+  type Generics = (db: any) => {
+    create: (table: string, {auth, query, merge, model, format, scopes}?: {
+      auth?: boolean, query?: any, merge?: any, model?: Skematic.Model, format?: Skematic.FormatOptions, scopes?: string[] }
+    ) => any;
+    update: (table: string, {auth, query, onResourceId, model, projectModel, scopes}?:
+      { auth?: boolean, query?: any, onResourceId?: boolean, model?: Skematic.Model, projectModel?: Skematic.Model, scopes?: string[] }
+    ) => any;
+    list: (table: string, {query, model, onResourceId, scopes}?: {
+      query?: any, model?: Skematic.Model, onResourceId?: boolean, scopes?: string[] }
+    ) => any;
+    read: (table: string, {query, _userKey, model, onResourceId, scopes}?: {
+      query?: any, _userKey?: any, model?: Skematic.Model, onResourceId?: boolean, scopes?: string[] }
+    ) => any;
+    remove: (table: string, {query, onResourceId, scopes}?: {
+      query?: any, onResourceId?: boolean, scopes?: string[] }
+    ) => any;
+  };
+
+  /** Fage middleware "namespace" object */
+  interface Mw {
+    readonly Data: MwData;
+    readonly Scopes: MwScopes;
+    readonly Verify: MwVerify;
+  }
+
+  /** Fage middleware Data api */
+  interface MwData {
+    /**
+     * verifyKeysOk(model, [input])
+     * Checks user provided data has no unknown keys - useful as a quick check
+     * validation prior to mutating raw user input. Thin wrapper for
+     * `Skematic.validate(... {keyCheckOnly: true})`
+     *
+     * ```js
+     * // Assuming Fage method block:
+     * fns: [(ctx, result) => data.verifyKeysOk(myModel, result)]
+     * // passing model AND input returns result as a Promise
+     * // or:
+     * fns: [data.verifyKeysOk(myModel)]
+     * // passing ONLY model return middleware that uses `ctx.input` as input
+     * ```
+     *
+     * @param {Object} model The Skematic model to validate against
+     * @param {Object} [input] Optional input - returns result as Promise if provided
+     *
+     * @returns {Function} Promise yielding function rejects 400 BadRequest
+     */
+    readonly verifyKeysOk: (model: Skematic.Model, input?: any) => Promise<any>;
+
+    /** */
+    readonly format: (model: Skematic.Model, opts: Skematic.FormatOptions, input?: any) => any;
+
+    /** */
+    readonly validate: (model: Skematic.Model, opts?: Skematic.ValidateOptions, input?: any) => any;
+
+    /**
+     * project(model, [useScopes, input])
+     * Skematic method to format field visibility based on the `model` and any
+     * provided scopes on `useScopes`. Resolve a Promise if `useScopes` and `input`
+     * are passed, otherwise returns a middelware fn that formats the data on
+     * `ctx.input` against scopes on `ctx.meta.claims`
+     *
+     * @param {Object} model The Skematic model to format against
+     * @param {Object} [useScopes] Optional scopes to use for matching
+     * @param {String} [input] Optional input data to project against
+     *
+     * @returns {Promise|Function}
+     */
+    readonly project: (model: Skematic.Model, useScopes?: string[], input?: string) => any;
+
+    /**
+     * mergeFromMeta(keymap)
+     * Merges `input` channel data with values from `meta` channel keys
+     * Enables saving meta (application derived) data down to user supplied data
+     *
+     * @param {Object} keymap Map `{toKey: 'fromMetaKey'}`
+     *
+     * @returns {Function} Middleware that merges meta keys (if any) and continues
+     */
+    readonly mergeFromMeta: (keymap?: any) => (ctx: Context) => any;
+  }
+
+  /** Fage middleware Scopes api */
+  interface MwScopes {
+    /**
+     * Verifies that the `claims` (or `ctx.meta.claims`) meet the `reqScopes`
+     * or THROWS a 403 Forbidden error
+     *
+     * @param {[String]|String} reqScopes The scopes required to be met
+     * @param {[String]|String} [claims] Optional claims to be checked
+     *
+     * @return {Promise|Function} Middleware fn if no claims provided
+     */
+    readonly verify: (reqScopes: string | string[], claims?: string | string[]) => any;
+
+    /**
+     * Boolean check `claims` (or `ctx.meta.claims`) meet the `reqScopes`
+     * and resolves as a Promise
+     *
+     * @param {[String]|String} reqScopes The scopes required to be met
+     * @param {[String]|String} [claims] Optional claims to be checked
+     *
+     * @return {Promise|Function} Middleware fn if no claims provided
+     */
+    readonly check: (reqScopes: string | string[], claims?: string | string[]) => any;
+  }
+
+  /** Fage middleware Verify api */
+  interface MwVerify {
+    /**
+     * hasMeta(field)
+     * Ensures that a specific `field` exists on the ctx.meta object and yields a
+     * 403 Forbidden error if not
+     *
+     * @param {String} field The meta field to evaluate presence on
+     * @param {String} [errType=forbidden] Default Fage error type
+     *
+     * @returns {Function} Promise yielding middleware that rejects 403 Forbidden
+     */
+    readonly hasMeta: (field: string, errType?: string) => (ctx: Context, output: any) =>
+      Promise<any>;
+
+    /**
+     * hasAuth(field)
+     * Identical to `hasMeta(field)` but returns 401 Unauthorized rather
+     * than the 403 Forbidden
+     *
+     * @param {String} field The meta field to evaluate presence on
+     *
+     * @returns {Function} Promise yielding middleware that rejects 401 Unauthorised
+     */
+    readonly hasAuth: (field: string) => (ctx: Context, output: any) => Promise<any>;
+
+    /**
+     * resultExists()
+     * Ensures that a result exists on the `output` channel of middleware
+     *
+     * @returns {Function} Promise yielding middleware that rejects 404 Not Found
+     */
+    readonly resultExists: () => (ctx: Context, output: any) => Promise<any>;
+
+    /**
+     * resultMatchMeta(resultField, metaField)
+     * Checks that a field on the result matches a field on the meta object
+     * This is useful for checking "ownership" fields
+     *
+     * @returns {Function} Promise yielding middleware that rejects 403 Forbidden
+     */
+    readonly resultMatchMeta: (resultField: string, metaField: string) =>
+      (ctx: Context, output: any) => Promise<any>;
+  }
+
   const error: ErrorBuilder;
+  const generics: Generics;
+  const mw: Mw;
 
   function run(
     methodBlock: MethodBlock

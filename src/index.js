@@ -1,6 +1,7 @@
-
 const Promise = require('bluebird')
 const error = require('./error')
+const generics = require('./generics')
+const middleware = require('./middleware')
 
 /*
   Bluebird is wonderful and infuriating. It tries to be clever and warn you
@@ -153,6 +154,11 @@ const run = (ctx, input, meta = {}) => {
 }
 
 // Main export is `generate()`
+
+// Attach generics & middleware to the main export
+module.exports.generics = generics
+module.exports.mw = middleware
+
 // Helpers attached as properties on the main export
 module.exports.compose = compose
 module.exports.run = run
