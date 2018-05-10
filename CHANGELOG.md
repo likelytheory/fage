@@ -1,3 +1,15 @@
+2.2.0 - 10 May 2018
+===
+
+Changed:
+- `generics` and `mw` now exposed on main export
+- Types for generics and middleware
+
+Removed:
+- `opts` block from main factory function
+
+
+
 2.1.0 - 4 May 2018
 ===
 
