@@ -1,6 +1,6 @@
-
+const {compose} = require('./compose_run')
 const memoryDBwrapper = require('./db')
-const {compose, error} = require('./index')
+const {error} = require('./index')
 const {Data, Scopes, Verify} = require('./middleware/index')
 
 /*
