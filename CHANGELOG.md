@@ -1,3 +1,12 @@
+2.2.1 - 28 May 2018
+===
+
+Changed:
+- Organisation name
+- Released as npm module `@likelytheory/fage`
+
+
+
 2.2.0 - 10 May 2018
 ===
 

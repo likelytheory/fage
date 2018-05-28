@@ -1,13 +1,17 @@
 {
   "name": "@likelytheory/fage",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Declarative middleware runner",
   "main": "index.js",
-  "private": true,
+  "files": [
+    "index.js",
+    "src/**/*.js",
+    "types/index.d.ts"
+  ],
   "scripts": {
-    "test": "ava -v"
+    "test": "ava -vv"
   },
-  "author": "cayuu (https://github.com/cayuu)",
+  "author": "Likely Theory (https://likelytheory.com)",
   "license": "UNLICENSED",
   "types": "types/index.d.ts",
   "dependencies": {

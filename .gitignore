@@ -4,3 +4,12 @@
 # Node.js
 npm-debug.log
 node_modules
+
+.nyc_output
+.vscode
+
+*.swp
+
+apis
+src/middleware/prep.js
+
