@@ -25,7 +25,7 @@ test('hasMeta(field, errType) returns errType error', async t => {
   const fn = verify.hasMeta('moo', 'badrequest')
 
   const out = await t.throws(fn(CTX))
-  t.is(out.type, 'BadRequest', 'expected a 400 BadRequest error')
+  t.is(out.type, 'Bad Request', 'expected a 400 Bad Request error')
 })
 
 test('hasAuth(field)', async t => {

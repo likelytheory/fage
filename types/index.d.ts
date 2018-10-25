@@ -1,9 +1,9 @@
-import * as Skematic from 'skematic';
+import * as Skematic from 'skematic'
 
-export = Fage;
-export as namespace Fage;
+export = Fage
+export as namespace Fage
 
-declare function Fage(methodBlocksArray: Fage.MethodBlock[]): Fage.RunBlock;
+declare function Fage (methodBlocksArray: Fage.MethodBlock[]): Fage.RunBlock
 
 declare namespace Fage {
   /**
@@ -18,48 +18,49 @@ declare namespace Fage {
     /**
      * `input` data channel: raw user input (untrusted)
      */
-    input: any;
+    input: any
 
     /**
      * `meta` data channel: trusted data set by the application
      */
-    meta: any;
+    meta: any
 
     /**
      * The path name of the Fage method block
      */
-    path: string;
+    path: string
 
     /**
      * Any reference data attached by the Fage method block
      */
-    ref?: any;
+    ref?: any
 
     /**
      * A mutable state container - set your own data here
      */
-    state?: any;
+    state?: any
   }
 
   interface RunBlock {
-    [pathKey: string]: (input: any, meta?: object) => any;
+    [pathKey: string]: (input: any, meta?: object) => any
   }
 
   interface ErrorOptions {
-    type?: string;
-    message?: string;
-    code?: number | string;
-    debug?: any;
-    errors?: any;
+    status?: number
+    type?: string
+    message?: string
+    code?: number | string
+    debug?: any
+    errors?: any
   }
 
   interface ErrorOptionsAll {
-    status: number;
-    type: string;
-    message?: string;
-    code?: number | string;
-    debug?: any;
-    errors?: any;
+    status: number
+    type: string
+    message?: string
+    code?: number | string
+    debug?: any
+    errors?: any
   }
 
   /**
@@ -73,34 +74,33 @@ declare namespace Fage {
    * @prop {any} [debug] A container for any debug info dumps
    * @prop {any} [errors] A container for errors to attach for reference
    */
-  interface Error {
-    status: number;
-    type: string;
-    message?: string;
-    code?: number | string;
-    debug?: any;
-    errors?: any;
+  interface FageError extends Error {
+    status: number
+    type: string
+    code?: number | string
+    debug?: any
+    errors?: any
   }
 
   interface ErrorBuilder {
-    create(options: ErrorOptionsAll): Error;
+    create (options: ErrorOptionsAll): FageError
 
     /** 400 Bad Request */
-    badrequest(opts: ErrorOptions | string): Error;
+    badrequest (opts?: ErrorOptions | string): FageError
     /** 401 Unauthorized */
-    unauthorized(opts: ErrorOptions | string): Error;
+    unauthorized (opts?: ErrorOptions | string): FageError
     /** 403 Forbidden */
-    forbidden(opts: ErrorOptions | string): Error;
+    forbidden (opts?: ErrorOptions | string): FageError
     /** 404 Not Found */
-    notfound(opts: ErrorOptions | string): Error;
+    notfound (opts?: ErrorOptions | string): FageError
     /** 409 Conflict */
-    conflict(opts: ErrorOptions | string): Error;
-    /** 421 Rate Limit */
-    ratelimit(opts: ErrorOptions | string): Error;
-    /** 500 Server Error */
-    fatal(opts: ErrorOptions | string): Error;
-    /** 503 Server Unavailable */
-    unavailable(opts: ErrorOptions | string): Error;
+    conflict (opts?: ErrorOptions | string): FageError
+    /** 429 Too Many Requests */
+    ratelimit (opts?: ErrorOptions | string): FageError
+    /** 500 Internal Server Error */
+    fatal (opts?: ErrorOptions | string): FageError
+    /** 503 Service Unavailable */
+    unavailable (opts?: ErrorOptions | string): FageError
   }
 
   /**
@@ -116,7 +116,7 @@ declare namespace Fage {
    * @throws {Error} Critical errors are thrown by Middleware
    * @returns {any} The result of this middleware function
    */
-  type Middleware = (ctx: Context, prevResult?: any) => any;
+  type Middleware = (ctx: Context, prevResult?: any) => any
 
   /**
    * A Fage MethodBlock defines the functions `fns` to run through the Promise
@@ -134,50 +134,50 @@ declare namespace Fage {
     /**
      * The `path` to uniquely identify the MethodBlock
      */
-    path: string;
+    path: string
 
     /**
      * An array of Fage.Middleware functions
      */
-    fns: Middleware[];
+    fns: Middleware[]
 
     /**
      * Any reference `ref` data to pass along to Middleware functions
      */
-    ref?: object;
+    ref?: object
 
     /**
      * A custom handler to process any Errors thrown by the Middleware.
      * Note that this is a pass through function, the thrown Error will
      * continue to be thrown after being processed by this handler.
      */
-    onError?: (error?: Error) => void;
+    onError?: (error?: Error) => void
   }
 
   /** Fage generics "namespace" object */
   type Generics = (db: any) => {
     create: (table: string, {auth, query, merge, model, format, scopes}?: {
       auth?: boolean, query?: any, merge?: any, model?: Skematic.Model, format?: Skematic.FormatOptions, scopes?: string[] }
-    ) => any;
+    ) => any
     update: (table: string, {auth, query, onResourceId, model, projectModel, scopes}?:
       { auth?: boolean, query?: any, onResourceId?: boolean, model?: Skematic.Model, projectModel?: Skematic.Model, scopes?: string[] }
-    ) => any;
+    ) => any
     list: (table: string, {query, model, onResourceId, scopes}?: {
       query?: any, model?: Skematic.Model, onResourceId?: boolean, scopes?: string[] }
-    ) => any;
+    ) => any
     read: (table: string, {query, _userKey, model, onResourceId, scopes}?: {
       query?: any, _userKey?: any, model?: Skematic.Model, onResourceId?: boolean, scopes?: string[] }
-    ) => any;
+    ) => any
     remove: (table: string, {query, onResourceId, scopes}?: {
       query?: any, onResourceId?: boolean, scopes?: string[] }
-    ) => any;
-  };
+    ) => any
+  }
 
   /** Fage middleware "namespace" object */
   interface Mw {
-    readonly Data: MwData;
-    readonly Scopes: MwScopes;
-    readonly Verify: MwVerify;
+    readonly Data: MwData
+    readonly Scopes: MwScopes
+    readonly Verify: MwVerify
   }
 
   /** Fage middleware Data api */
@@ -200,15 +200,15 @@ declare namespace Fage {
      * @param {Object} model The Skematic model to validate against
      * @param {Object} [input] Optional input - returns result as Promise if provided
      *
-     * @returns {Function} Promise yielding function rejects 400 BadRequest
+     * @returns {Function} Promise yielding function rejects 400 Bad Request
      */
-    readonly verifyKeysOk: (model: Skematic.Model, input?: any) => Promise<any>;
+    readonly verifyKeysOk: (model: Skematic.Model, input?: any) => Promise<any>
 
     /** */
-    readonly format: (model: Skematic.Model, opts: Skematic.FormatOptions, input?: any) => any;
+    readonly format: (model: Skematic.Model, opts: Skematic.FormatOptions, input?: any) => any
 
     /** */
-    readonly validate: (model: Skematic.Model, opts?: Skematic.ValidateOptions, input?: any) => any;
+    readonly validate: (model: Skematic.Model, opts?: Skematic.ValidateOptions, input?: any) => any
 
     /**
      * project(model, [useScopes, input])
@@ -223,7 +223,7 @@ declare namespace Fage {
      *
      * @returns {Promise|Function}
      */
-    readonly project: (model: Skematic.Model, useScopes?: string[], input?: string) => any;
+    readonly project: (model: Skematic.Model, useScopes?: string[], input?: string) => any
 
     /**
      * mergeFromMeta(keymap)
@@ -234,7 +234,7 @@ declare namespace Fage {
      *
      * @returns {Function} Middleware that merges meta keys (if any) and continues
      */
-    readonly mergeFromMeta: (keymap?: any) => (ctx: Context) => any;
+    readonly mergeFromMeta: (keymap?: any) => (ctx: Context) => any
   }
 
   /** Fage middleware Scopes api */
@@ -248,7 +248,7 @@ declare namespace Fage {
      *
      * @return {Promise|Function} Middleware fn if no claims provided
      */
-    readonly verify: (reqScopes: string | string[], claims?: string | string[]) => any;
+    readonly verify: (reqScopes: string | string[], claims?: string | string[]) => any
 
     /**
      * Boolean check `claims` (or `ctx.meta.claims`) meet the `reqScopes`
@@ -259,7 +259,7 @@ declare namespace Fage {
      *
      * @return {Promise|Function} Middleware fn if no claims provided
      */
-    readonly check: (reqScopes: string | string[], claims?: string | string[]) => any;
+    readonly check: (reqScopes: string | string[], claims?: string | string[]) => any
   }
 
   /** Fage middleware Verify api */
@@ -275,7 +275,7 @@ declare namespace Fage {
      * @returns {Function} Promise yielding middleware that rejects 403 Forbidden
      */
     readonly hasMeta: (field: string, errType?: string) => (ctx: Context, output: any) =>
-      Promise<any>;
+      Promise<any>
 
     /**
      * hasAuth(field)
@@ -286,7 +286,7 @@ declare namespace Fage {
      *
      * @returns {Function} Promise yielding middleware that rejects 401 Unauthorised
      */
-    readonly hasAuth: (field: string) => (ctx: Context, output: any) => Promise<any>;
+    readonly hasAuth: (field: string) => (ctx: Context, output: any) => Promise<any>
 
     /**
      * resultExists()
@@ -294,7 +294,7 @@ declare namespace Fage {
      *
      * @returns {Function} Promise yielding middleware that rejects 404 Not Found
      */
-    readonly resultExists: () => (ctx: Context, output: any) => Promise<any>;
+    readonly resultExists: () => (ctx: Context, output: any) => Promise<any>
 
     /**
      * resultMatchMeta(resultField, metaField)
@@ -304,18 +304,20 @@ declare namespace Fage {
      * @returns {Function} Promise yielding middleware that rejects 403 Forbidden
      */
     readonly resultMatchMeta: (resultField: string, metaField: string) =>
-      (ctx: Context, output: any) => Promise<any>;
+      (ctx: Context, output: any) => Promise<any>
   }
 
-  const error: ErrorBuilder;
-  const generics: Generics;
-  const mw: Mw;
+  const error: ErrorBuilder
+  const generics: Generics
+  const mw: Mw
 
   function run(
-    methodBlock: MethodBlock
-  ): Promise<any>;
+    methodBlock: MethodBlock,
+    input?: any,
+    meta?: any
+  ): Promise<any>
 
   function compose(
     fns: Middleware[]
-  ): Middleware;
+  ): Middleware
 }

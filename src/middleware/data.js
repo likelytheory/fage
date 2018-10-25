@@ -26,7 +26,7 @@ const NO_CONTEXT_OBJ = new Error('No context object present')
  * @param {Object} model The Skematic model to validate against
  * @param {Object} [input] Optional input - returns result as Promise if provided
  *
- * @returns {Function} Promise yielding function rejects 400 BadRequest
+ * @returns {Function} Promise yielding function rejects 400 Bad Request
  */
 
 Data.verifyKeysOk = (model, input) => {
