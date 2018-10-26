@@ -1,3 +1,12 @@
+2.3.0 - 26 October 2018
+===
+
+Changed:
+- Error functions called with no arguments bear canonical error message
+- Updated npm package dependencies
+
+
+
 2.2.1 - 28 May 2018
 ===
 
