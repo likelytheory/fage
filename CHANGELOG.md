@@ -1,3 +1,11 @@
+2.4.0 - 2 May 2021
+===
+
+Changed:
+- Stripped out `generics` export to prevent Node warning of missing circular ref
+
+
+
 2.3.0 - 26 October 2018
 ===
 
