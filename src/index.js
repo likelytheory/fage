@@ -1,7 +1,6 @@
 const Promise = require('bluebird')
 const {compose, run} = require('./compose_run')
 const error = require('./error')
-const generics = require('./generics')
 const middleware = require('./middleware')
 
 /*
@@ -50,8 +49,7 @@ module.exports = blocks => blocks.reduce((sdk, m) => {
 
 // Main export is `generate()`
 
-// Attach generics & middleware to the main export
-module.exports.generics = generics
+// Attach middleware to the main export
 module.exports.mw = middleware
 
 // Helpers attached as properties on the main export
